@@ -10,25 +10,25 @@
 	<detectionList> 
 		<Advertisement>
 			<idMedia>1</idMedia>
-			<idAd>4567</idAd>	<!-- nom du fichier signature = 4567.raw -->		
-			<startDate>2010-02-23 00:26:23</startDate>  
-			<endDate>2010-02-23 00:27:03</endDate> 
-			<eventDate>2010-02-23 00:27:03</eventDate>
+			<id>4567</id>	<!-- nom du fichier signature = 4567.raw -->		
+		 <!-- <startDate>2009-11-30 06:49:13</startDate>
+		  <endDate>2009-11-30 06:49:23</endDate> -->
+			<eventDate>2009-11-30 06:49:23</eventDate>
 		</Advertisement>
 
 		<MusicTrack>
 			<idMedia>1</idMedia>
-			<idMusic>4567</idMusic>
-			<startDate>2010-02-23 00:26:23</startDate> 
-			<endDate>2010-02-23 00:27:03</endDate> 
+			<id>4567</id>
+		  <startDate>2009-11-30 06:49:13</startDate>
+		  <endDate>2009-11-30 06:49:23</endDate>
 			<eventDate>2010-02-23 00:27:03</eventDate>
 		</MusicTrack>
 
 		<Advertisement>
 			<idMedia>1</idMedia>
-			<idAd>4567</idAd>
-			<startDate>2010-02-23 00:26:23</startDate> 
-			<endDate>2010-02-23 00:27:03</endDate> 
+			<id>4567</id>
+		  <startDate>2009-11-30 06:49:13</startDate>
+		  <endDate>2009-11-30 06:49:23</endDate>
 			<eventDate>2010-02-23 00:27:03</eventDate>
 		</Advertisement>
 	</detectionList>

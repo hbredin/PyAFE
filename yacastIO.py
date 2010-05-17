@@ -2,32 +2,85 @@ from lxml import etree
 from lxml import objectify
 import time
 import datetime
-import datetimerange
 
-# ---- Yacast Advertisement ----
-class YacastAdvertisement(object):
-    """docstring for YacastAdvertisement"""
+class YacastEvent(object):
+    """docstring for YacastEvent"""
+    
+    # Initializer
+    def __init__(self, xmlEvent):
+        super(YacastEvent, self).__init__()
+        
+        # Get start date/time when available
+        if hasattr(xmlEvent, 'startDate'):
+            tStart = time.strptime(str(xmlEvent.startDate), "%Y-%m-%d %H:%M:%S")
+            self.dtStart = datetime.datetime(*tStart[0:6])
+        
+        # Get end date/time when available
+        if hasattr(xmlEvent, 'endDate'):
+            tEnd = time.strptime(str(xmlEvent.endDate), "%Y-%m-%d %H:%M:%S")
+            self.dtEnd = datetime.datetime(*tEnd[0:6])
+        
+        # Get event date/time only when start and stop date are not both available
+        if not(hasattr(self, 'dtStart')) or not(hasattr(self, 'dtStop')):
+            if hasattr(xmlEvent, 'eventDate'):
+                tEvent = time.strptime(str(xmlEvent.eventDate), "%Y-%m-%d %H:%M:%S")
+                self.dtStart = datetime.datetime(*tEvent[0:6])
+                self.dtEnd = datetime.datetime(*tEvent[0:6])
+    
+    def timerange_description(self):
+        """docstring for description"""
+        return self.dtStart.strftime("%H:%M:%S") + " - " + self.dtEnd.strftime("%H:%M:%S")
+        
+    def compareDate(self, other):
+        return cmp(self.dtStart, other.dtStart)
+    
+    def intersects(self, other):
+        """returns FALSE if intersection is empty, TRUE otherwise"""
+        startsBefore = (cmp(self.dtStart, other.dtStart) <= 0)
+        if startsBefore:
+            endsAfterOtherStarts = (cmp(self.dtEnd, other.dtStart) >= 0)
+            return endsAfterOtherStarts
+        else:
+            startsBeforeOtherEnds = (cmp(self.dtStart, other.dtEnd) <= 0)
+            return startsBeforeOtherEnds
+
+    def findIntersectingEvents(self, sorted_event_list):
+        """docstring for findIntersectingEvents"""
+        intersecting_events_list = []
+        for the_event in sorted_event_list:
+            if self.intersects(the_event):
+                intersecting_events_list.append(the_event)
+        return intersecting_events_list
+
+# Yacast Advertisement
+class YacastAd(YacastEvent):
+    """docstring for YacastAd"""
     def __init__(self, xmlAdvertisement):
-        self.media = xmlAdvertisement.idMedia
+        
+        # self = YacastEvent(xmlAdvertisement)
+        super(YacastAd, self).__init__(xmlAdvertisement)
+        
+        if hasattr(xmlAdvertisement, 'idMedia'):
+            self.idMedia = xmlAdvertisement.idMedia
+        if hasattr(xmlAdvertisement, 'id'):
+            self.id = str(xmlAdvertisement.id)
         if hasattr(xmlAdvertisement, 'name'):
-            self.name  = xmlAdvertisement.name
+            self.name = xmlAdvertisement.name
         if hasattr(xmlAdvertisement, 'description'):
             self.description = xmlAdvertisement.description
-        tStart = time.strptime(str(xmlAdvertisement.startDate), "%Y-%m-%d %H:%M:%S")
-        tEnd =  time.strptime(str(xmlAdvertisement.endDate), "%Y-%m-%d %H:%M:%S")
-        dtStart = datetime.datetime(*tStart[0:6])
-        dtEnd = datetime.datetime(*tEnd[0:6])
-        self.datetimerange = datetimerange.DateTimeRange(dtStart, dtEnd) 
-    
-    def compareStart(self, yad):
-        return self.datetimerange.compareStart(yad.datetimerange)
 
-# ---- Yacast Music ----
-class YacastMusic(object):
-    """docstring for YacastMusic"""
+# Yacast MusicTrack
+class YacastZik(YacastEvent):
+    """docstring for YacastZik"""
     def __init__(self, xmlMusic):
+        
+        # self = YacastEvent(xmlMusic)
+        super(YacastZik, self).__init__(xmlMusic)
+        
+        if hasattr(xmlMusic, 'idMedia'):
+             self.idMedia = xmlMusic.idMedia
         if hasattr(xmlMusic, 'id'):
-            self.id = xmlMusic.id
+            self.id = str(xmlMusic.id)
         if hasattr(xmlMusic, 'title'):
             self.title = xmlMusic.title
         if hasattr(xmlMusic, 'artist'):
@@ -36,43 +89,33 @@ class YacastMusic(object):
             self.label = xmlMusic.label
         if hasattr(xmlMusic, 'genre'):
             self.genre = xmlMusic.genre
-        tStart =  time.strptime(str(xmlMusic.startDate), "%Y-%m-%d %H:%M:%S")
-        tEnd =  time.strptime(str(xmlMusic.endDate), "%Y-%m-%d %H:%M:%S")
-        dtStart = datetime.datetime(*tStart[0:6])
-        dtEnd = datetime.datetime(*tEnd[0:6])
-        self.datetimerange = datetimerange.DateTimeRange(dtStart, dtEnd) 
         if hasattr(xmlMusic, 'fileName'):
-            self.filename = xmlMusic.fileName
-        if hasattr(xmlMusic, 'idMedia'):
-            self.media = xmlMusic.idMedia
-    
-    def compareStart(self, yad):
-        return self.datetimerange.compareStart(yad.datetimerange)
+            self.fileName = xmlMusic.fileName
 
-# --- Load Yacast Advertising.xml files as array of YacastAdvertisement
+# --- Load Yacast Advertising.xml files as array of YacastAd
 def loadAdvertisementList(path2xml):
     obj = objectify.parse(path2xml)
     root = obj.getroot()
     allAds = root.Advertisement
-
+    
     numAd = len(allAds)
     adsList = []
     for oneAd in allAds:
-        adsList.append(YacastAdvertisement(oneAd))
+        adsList.append(YacastAd(oneAd))
+    
+    adsList.sort(YacastEvent.compareDate)
+    return adsList
 
-    adsList.sort(YacastAdvertisement.compareStart)
-    return adsList    
-
-# --- Load Yacast Music.xml files as array of YacastMusic
+# --- Load Yacast Music.xml files as array of YacastZik
 def loadMusicList(path2xml):
     obj = objectify.parse(path2xml)
     root = obj.getroot()
     allMusics = root.MusicTrack
-
+    
     numMusic = len(allMusics)
     musicsList = []
     for oneMusic in allMusics:
-        musicsList.append(YacastMusic(oneMusic))
-
-    musicsList.sort(YacastMusic.compareStart)
+        musicsList.append(YacastZik(oneMusic))
+    
+    musicsList.sort(YacastEvent.compareDate)
     return musicsList    
