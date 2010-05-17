@@ -9,11 +9,8 @@
 	<date></date> -->
 	<detectionList> 
 		<Advertisement>
-			<idMedia>1</idMedia>
-			<id>4567</id>	<!-- nom du fichier signature = 4567.raw -->		
-		 <!-- <startDate>2009-11-30 06:49:13</startDate>
-		  <endDate>2009-11-30 06:49:23</endDate> -->
-			<eventDate>2009-11-30 06:49:23</eventDate>
+		  <id>297298</id>
+		  <eventDate>2010-03-02 23:43:51</eventDate>
 		</Advertisement>
 
 		<MusicTrack>
@@ -24,13 +21,6 @@
 			<eventDate>2010-02-23 00:27:03</eventDate>
 		</MusicTrack>
 
-		<Advertisement>
-			<idMedia>1</idMedia>
-			<id>4567</id>
-		  <startDate>2009-11-30 06:49:13</startDate>
-		  <endDate>2009-11-30 06:49:23</endDate>
-			<eventDate>2010-02-23 00:27:03</eventDate>
-		</Advertisement>
 	</detectionList>
 
 </submission>

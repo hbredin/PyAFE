@@ -60,14 +60,21 @@ class YacastAd(YacastEvent):
         # self = YacastEvent(xmlAdvertisement)
         super(YacastAd, self).__init__(xmlAdvertisement)
         
-        if hasattr(xmlAdvertisement, 'idMedia'):
-            self.idMedia = xmlAdvertisement.idMedia
         if hasattr(xmlAdvertisement, 'id'):
             self.id = str(xmlAdvertisement.id)
+        if hasattr(xmlAdvertisement, 'idMedia'):
+            self.idMedia = xmlAdvertisement.idMedia
         if hasattr(xmlAdvertisement, 'name'):
             self.name = xmlAdvertisement.name
+        if hasattr(xmlAdvertisement, 'brand'):
+            self.brand = xmlAdvertisement.brand
+        if hasattr(xmlAdvertisement, 'advertiser'):
+            self.advertiser = xmlAdvertisement.advertiser
         if hasattr(xmlAdvertisement, 'description'):
             self.description = xmlAdvertisement.description
+        if hasattr(xmlAdvertisement, 'signatureFile'):
+            self.signatureFile = xmlAdvertisement.signatureFile
+            
 
 # Yacast MusicTrack
 class YacastZik(YacastEvent):
@@ -77,8 +84,6 @@ class YacastZik(YacastEvent):
         # self = YacastEvent(xmlMusic)
         super(YacastZik, self).__init__(xmlMusic)
         
-        if hasattr(xmlMusic, 'idMedia'):
-             self.idMedia = xmlMusic.idMedia
         if hasattr(xmlMusic, 'id'):
             self.id = str(xmlMusic.id)
         if hasattr(xmlMusic, 'title'):
@@ -91,6 +96,10 @@ class YacastZik(YacastEvent):
             self.genre = xmlMusic.genre
         if hasattr(xmlMusic, 'fileName'):
             self.fileName = xmlMusic.fileName
+        if hasattr(xmlMusic, 'signaturePath'):
+            self.signaturePath = xmlMusic.signaturePath
+        if hasattr(xmlMusic, 'idMedia'):
+             self.idMedia = xmlMusic.idMedia
 
 # --- Load Yacast Advertising.xml files as array of YacastAd
 def loadAdvertisementList(path2xml):
