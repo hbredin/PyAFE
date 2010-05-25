@@ -15,8 +15,14 @@ class Submission(object):
             self.participantId = xmlroot.participantId
 
         if hasattr(xmlroot, 'detectionList'):
-            all_ad = xmlroot.detectionList[0].Advertisement
-            all_zik = xmlroot.detectionList[0].MusicTrack
+            if hasattr(xmlroot.detectionList, 'Advertisement'):
+                all_ad = xmlroot.detectionList[0].Advertisement
+            else:
+                all_ad = []
+            if hasattr(xmlroot.detectionList, 'MusicTrack'):
+                all_zik = xmlroot.detectionList[0].MusicTrack
+            else:
+                all_zik = []
         
         self.ad_list = []
         for one_ad in all_ad:

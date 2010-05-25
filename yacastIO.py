@@ -105,7 +105,10 @@ class YacastZik(YacastEvent):
 def loadAdvertisementList(path2xml):
     obj = objectify.parse(path2xml)
     root = obj.getroot()
-    allAds = root.Advertisement
+    if hasattr( root, 'Advertisement'):
+        allAds = root.Advertisement
+    else:
+        allAds = []
     
     numAd = len(allAds)
     adsList = []
@@ -119,7 +122,10 @@ def loadAdvertisementList(path2xml):
 def loadMusicList(path2xml):
     obj = objectify.parse(path2xml)
     root = obj.getroot()
-    allMusics = root.MusicTrack
+    if hasattr(root, 'MusicTrack'):
+        allMusics = root.MusicTrack
+    else:
+        allMusics = []    
     
     numMusic = len(allMusics)
     musicsList = []
