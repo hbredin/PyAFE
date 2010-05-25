@@ -1,4 +1,4 @@
-# Code by Hervé BREDIN (bredin@irit.fr) and Mathieu RAMONA (Mathieu.Ramona@ircam.fr)
+# Code by Herve BREDIN (bredin@irit.fr) and Mathieu RAMONA (Mathieu.Ramona@ircam.fr)
 
 import yacastIO
 import submissionIO
