@@ -1,5 +1,8 @@
+# Code by Hervé BREDIN (bredin@irit.fr) and Mathieu RAMONA (Mathieu.Ramona@ircam.fr)
+
 import yacastIO
 import submissionIO
+import getopt, sys
 
 class eval_result(object):
     """docstring for evaluation"""
@@ -110,3 +113,50 @@ def eval_zik(path2xml_zik, path2xml_sub):
     e.submission = submission.submissionId
 
     return e
+
+
+def usage():
+	print "HELP eval_cmd.py :"
+	print "  -a, --ads          Advertising XML file"
+	print "  -m, --music        Music XML file"
+	print "  -s, --submission   Sumission XML file"
+	print "  -h, --help         Print this help"
+
+if __name__ == '__main__':
+    try:
+    	opts, args = getopt.getopt(sys.argv[1:], "ha:m:s:", ["help", "ads=", "music=", "submission="])
+    except getopt.GetoptError, err:
+    	# print help information and exit:
+    	print str(err) # will print something like "option -a not recognized"
+    	usage()
+    	sys.exit(2)
+    path2xml_ad = "";
+    path2xml_zik = "";
+    path2xml_sub = "";
+    # print opts
+    # print args
+    for opt, arg in opts:
+    	if opt in ("-h", "--help"):
+    		usage()
+    		sys.exit()
+    	elif opt in ("-a", "--ads"):
+    		path2xml_ad = arg
+    	elif opt in ("-m", "--music"):
+    		path2xml_zik = arg
+    	elif opt in ("-s", "--submission"):
+    		path2xml_sub = arg
+    	else:
+    		assert False, "unhandled option"
+
+    if len(path2xml_sub) == 0:
+    	print "Error : no submission file submitted."
+    	sys.exit(2)
+    if len(path2xml_ad) != 0:
+    	ad = eval_ads(path2xml_ad, path2xml_sub)
+    	print "Advertisement :", 
+    	ad.show()
+    if len(path2xml_zik) != 0:
+    	zik = eval_zik(path2xml_zik, path2xml_sub)
+    	print "Music :", 
+    	zik.show()
+    
