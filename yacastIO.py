@@ -62,6 +62,8 @@ class YacastAd(YacastEvent):
         
         if hasattr(xmlAdvertisement, 'id'):
             self.id = str(xmlAdvertisement.id)
+        if hasattr(xmlAdvertisement, 'idAd'):
+            self.id = str(xmlAdvertisement.idAd)        
         if hasattr(xmlAdvertisement, 'idMedia'):
             self.idMedia = xmlAdvertisement.idMedia
         if hasattr(xmlAdvertisement, 'name'):
@@ -86,6 +88,8 @@ class YacastZik(YacastEvent):
         
         if hasattr(xmlMusic, 'id'):
             self.id = str(xmlMusic.id)
+        if hasattr(xmlMusic, 'idMusic'):
+            self.id = str(xmlMusic.idMusic)        
         if hasattr(xmlMusic, 'title'):
             self.title = xmlMusic.title
         if hasattr(xmlMusic, 'artist'):
