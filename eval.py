@@ -20,7 +20,24 @@ class eval_result(object):
     def show(self):
         """docstring for show"""
         print self.participant + " " + self.submission + " | OK = " + str(self.good)  + " | Bad = " + str(self.bad1) + " - " + str(self.bad2) + " - " + str(self.bad3) + " | Missed = " + str(self.missed) + " | Total = " + str(self.number)
-        
+      
+    def add(self, other):
+        if self.participant == "":
+            self.participant = other.participant
+        if self.submission == "":
+            self.submission = other.submission
+        if self.participant != other.participant:
+            print "Error : participants differ: %s vs. %s" % (self.participant, other.participant)
+        elif self.submission != other.submission:
+            print "Error : submissions differ: %s vs. %s" % (self.submission, other.submission)
+        else:    
+            self.number = self.number + other.number
+            self.missed = self.missed + other.missed
+            self.good = self.good + other.good
+            self.bad1 = self.bad1 + other.bad1
+            self.bad2 = self.bad2 + other.bad2
+            self.bad3 = self.bad3 + other.bad3
+        return self
 
 def eval_events(reference_events, submission_events):
     """docstring for eval"""
