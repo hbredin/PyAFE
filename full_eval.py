@@ -13,7 +13,7 @@ def getListOfRelativePathToFile( mydir, filename ):
     return fileList
 
 
-def full_eval_zik(path2groundtruth, path2submission, subname):
+def full_eval_zik(path2groundtruth, path2submission, subname, partial):
     # Get list of annotation files
     gtname = "Music.xml"
     annFiles = getListOfRelativePathToFile( path2groundtruth, gtname )
@@ -27,17 +27,19 @@ def full_eval_zik(path2groundtruth, path2submission, subname):
 
         # Make sure it exists
         if os.path.exists(path2xml_sub) == False:
-            print "%s > ERROR - missing submission file" % (os.path.join(annFile, gtname))
-            e = eval.eval_zik(path2xml_gt, None)
+            if partial == False:
+                print "%s > ERROR - missing submission file" % (os.path.join(annFile, gtname))
+                e = eval.eval_zik(path2xml_gt, None)
+                evalList.append(e)                
         else:
             e = eval.eval_zik(path2xml_gt, path2xml_sub)
             print "%s > %s " % (os.path.join(annFile, gtname), e.description())
-        evalList.append(e) 
+            evalList.append(e)
 
     return evalList
 
 
-def full_eval_ads(path2groundtruth, path2submission, subname):
+def full_eval_ads(path2groundtruth, path2submission, subname, partial):
     # Get list of annotation files
     gtname = "Advertising.xml"
     annFiles = getListOfRelativePathToFile( path2groundtruth, gtname )
@@ -51,12 +53,14 @@ def full_eval_ads(path2groundtruth, path2submission, subname):
 
         # Make sure it exists
         if os.path.exists(path2xml_sub) == False:
-            print "%s > ERROR - missing submission file" % (os.path.join(annFile, gtname))
-            e = eval.eval_ads(path2xml_gt, None)
+            if partial == False:
+                print "%s > ERROR - missing submission file" % (os.path.join(annFile, gtname))
+                e = eval.eval_ads(path2xml_gt, None)
+                evalList.append(e) 
         else:
             e = eval.eval_ads(path2xml_gt, path2xml_sub)
             print "%s > %s " % (os.path.join(annFile, gtname), e.description())
-        evalList.append(e) 
+            evalList.append(e) 
 
     return evalList
 
@@ -67,11 +71,12 @@ def usage():
     print "  -n  --filename     Name of submission files. Default is submission.xml"
     print "  -m  --music        Only perform music evaluation"
     print "  -a  --ads          Only perform ads evaluation"
+    print "  -p  --partial      Only evaluate available submission files"
     print "  -h, --help         Print this help"
 
 if __name__ == '__main__':
     try:
-    	opts, args = getopt.getopt(sys.argv[1:], "hamg:s:n:", ["help", "music", "ads", "groundtruth=", "submission=", "filename="])
+    	opts, args = getopt.getopt(sys.argv[1:], "hampg:s:n:", ["help", "music", "ads", "partial", "groundtruth=", "submission=", "filename="])
     except getopt.GetoptError, err:
     	# print help information and exit:
     	print str(err) # will print something like "option -a not recognized"
@@ -83,6 +88,7 @@ if __name__ == '__main__':
     subName = "submission.xml";
     adsOnly = False
     zikOnly = False
+    partial = False
     # print opts
     # print args
     for opt, arg in opts:
@@ -99,6 +105,8 @@ if __name__ == '__main__':
     		path2submission = arg
     	elif opt in ("-n", "--filename"):
     	    subName = arg
+    	elif opt in ("-p", "--partial"):
+    	    partial = True
     	else:
     		assert False, "unhandled option"
 
@@ -113,7 +121,7 @@ if __name__ == '__main__':
         sys.exit(2)
 
     if adsOnly == False:
-        results_zik = full_eval_zik(path2groundtruth, path2submission, subName)
+        results_zik = full_eval_zik(path2groundtruth, path2submission, subName, partial)
         global_zik = eval.eval_result()
         for r in results_zik:
             global_zik.add(r)
@@ -121,7 +129,7 @@ if __name__ == '__main__':
         global_zik.show()
         
     if zikOnly == False:
-        results_ads = full_eval_ads(path2groundtruth, path2submission, subName)
+        results_ads = full_eval_ads(path2groundtruth, path2submission, subName, partial)
         global_ads = eval.eval_result()
         for r in results_ads:
             global_ads.add(r)
