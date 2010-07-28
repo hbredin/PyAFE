@@ -53,15 +53,54 @@ def eval_events(reference_events, submission_events):
     e.bad2 = 0
     e.bad3 = 0
 
+    # add event with ID = -1 to fill holes
+    holes = []
+    for i in range(0, len(reference_events)-2):
+        prev_event = reference_events[i]
+        next_event = reference_events[i+1]
+        if (cmp(prev_event.dtEnd, next_event.dtStart) < 0):
+            hole = yacastIO.YacastEvent(None)
+            hole.dtStart = prev_event.dtEnd
+            hole.dtEnd   = next_event.dtStart
+            hole.id      = -1
+            holes.append(hole)
+    
+    # add a hole at the beginning if submitted events starts before first reference event
+    first_ref_event = reference_events[0]
+    first_sub_event = submission_events[0]
+    if (cmp(first_sub_event.dtStart, first_ref_event.dtStart) < 0):
+        hole = yacastIO.YacastEvent(None)
+        hole.dtStart = first_sub_event.dtStart
+        hole.dtEnd = first_ref_event.dtStart
+        hole.id = -1
+        holes.append(hole)
+        
+    # add a hole at the end if submitted events ends after last reference event
+    last_ref_event = reference_events[-1]
+    last_sub_event = submission_events[-1]
+    if (cmp(last_sub_event.dtEnd, last_ref_event.dtEnd) > 0):
+        hole = yacastIO.YacastEvent(None)
+        hole.dtStart = last_ref_event.dtEnd
+        hole.dtEnd = last_sub_event.dtEnd
+        hole.id = -1
+        holes.append(hole)
+        
+    # add holes
+    filled_reference_events = []
+    filled_reference_events.extend(reference_events)
+    filled_reference_events.extend(holes)
+    filled_reference_events.sort(yacastIO.YacastEvent.compareDate)
+
     # for each event in reference
-    for cur_event in reference_events:
+    for cur_event in filled_reference_events:
         
         # array 'inter_events' contains events that are detected during 'cur_event'
         inter_events = cur_event.findIntersectingEvents(submission_events)
         
         # 'missed' is incremented if no event is detected during 'cur_event' 
-        if len(inter_events) == 0:
-            e.missed = e.missed + 1
+        if cur_event.id != -1:
+            if len(inter_events) == 0:
+                e.missed = e.missed + 1
 
         # 'inter_counter[id]' is the number of time event with index 'id' is detected during 'cur_event'
         inter_counter = {} 
