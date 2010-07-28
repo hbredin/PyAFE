@@ -21,16 +21,18 @@ def full_eval_zik(path2groundtruth, path2submission, subname):
     evalList = []
     for annFile in annFiles:
         # Get full path to groundtruth xml file
-        path2xml_gt = os.path.join(path2submission, annFile, gtname)
+        path2xml_gt = os.path.join(path2groundtruth, annFile, gtname)
         # Get full path to expected submission xml file
         path2xml_sub = os.path.join(path2submission, annFile, subname)
+
         # Make sure it exists
         if os.path.exists(path2xml_sub) == False:
-            print "Missing file %s" % path2xml_sub
+            print "%s > ERROR - missing submission file" % (os.path.join(annFile, gtname))
+            e = eval.eval_zik(path2xml_gt, None)
         else:
-        # Actual evaluation
             e = eval.eval_zik(path2xml_gt, path2xml_sub)
-            evalList.append(e) 
+            print "%s > %s " % (os.path.join(annFile, gtname), e.description())
+        evalList.append(e) 
 
     return evalList
 
@@ -43,16 +45,19 @@ def full_eval_ads(path2groundtruth, path2submission, subname):
     evalList = []
     for annFile in annFiles:
         # Get full path to groundtruth xml file
-        path2xml_gt = os.path.join(path2submission, annFile, gtname)
+        path2xml_gt = os.path.join(path2groundtruth, annFile, gtname)
         # Get full path to expected submission xml file
         path2xml_sub = os.path.join(path2submission, annFile, subname)
+
         # Make sure it exists
         if os.path.exists(path2xml_sub) == False:
-            print "Missing file %s" % path2xml_sub
+            print "%s > ERROR - missing submission file" % (os.path.join(annFile, gtname))
+            e = eval.eval_ads(path2xml_gt, None)
         else:
-        # Actual evaluation
             e = eval.eval_ads(path2xml_gt, path2xml_sub)
-            evalList.append(e) 
+            print "%s > %s " % (os.path.join(annFile, gtname), e.description())
+        evalList.append(e) 
+
     return evalList
 
 def usage():
