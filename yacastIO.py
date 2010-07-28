@@ -6,26 +6,27 @@ import datetime
 class YacastEvent(object):
     """docstring for YacastEvent"""
     
-    # Initializer
+    # Initializer    
     def __init__(self, xmlEvent):
         super(YacastEvent, self).__init__()
         
-        # Get start date/time when available
-        if hasattr(xmlEvent, 'startDate'):
-            tStart = time.strptime(str(xmlEvent.startDate), "%Y-%m-%d %H:%M:%S")
-            self.dtStart = datetime.datetime(*tStart[0:6])
+        if xmlEvent != None:
+            # Get start date/time when available
+            if hasattr(xmlEvent, 'startDate'):
+                tStart = time.strptime(str(xmlEvent.startDate), "%Y-%m-%d %H:%M:%S")
+                self.dtStart = datetime.datetime(*tStart[0:6])
         
-        # Get end date/time when available
-        if hasattr(xmlEvent, 'endDate'):
-            tEnd = time.strptime(str(xmlEvent.endDate), "%Y-%m-%d %H:%M:%S")
-            self.dtEnd = datetime.datetime(*tEnd[0:6])
+            # Get end date/time when available
+            if hasattr(xmlEvent, 'endDate'):
+                tEnd = time.strptime(str(xmlEvent.endDate), "%Y-%m-%d %H:%M:%S")
+                self.dtEnd = datetime.datetime(*tEnd[0:6])
         
-        # Get event date/time only when start and stop date are not both available
-        if not(hasattr(self, 'dtStart')) or not(hasattr(self, 'dtStop')):
-            if hasattr(xmlEvent, 'eventDate'):
-                tEvent = time.strptime(str(xmlEvent.eventDate), "%Y-%m-%d %H:%M:%S")
-                self.dtStart = datetime.datetime(*tEvent[0:6])
-                self.dtEnd = datetime.datetime(*tEvent[0:6])
+            # Get event date/time only when start and stop date are not both available
+            if not(hasattr(self, 'dtStart')) or not(hasattr(self, 'dtStop')):
+                if hasattr(xmlEvent, 'eventDate'):
+                    tEvent = time.strptime(str(xmlEvent.eventDate), "%Y-%m-%d %H:%M:%S")
+                    self.dtStart = datetime.datetime(*tEvent[0:6])
+                    self.dtEnd = datetime.datetime(*tEvent[0:6])
     
     def timerange_description(self):
         """docstring for description"""
