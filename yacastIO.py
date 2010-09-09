@@ -52,6 +52,10 @@ class YacastEvent(object):
             if self.intersects(the_event):
                 intersecting_events_list.append(the_event)
         return intersecting_events_list
+    
+    def description(self):
+        return str(self.dtStart) + " > " + str(self.dtEnd) 
+        
 
 # Yacast Advertisement
 class YacastAd(YacastEvent):
@@ -77,8 +81,7 @@ class YacastAd(YacastEvent):
             self.description = xmlAdvertisement.description
         if hasattr(xmlAdvertisement, 'signatureFile'):
             self.signatureFile = xmlAdvertisement.signatureFile
-            
-
+    
 # Yacast MusicTrack
 class YacastZik(YacastEvent):
     """docstring for YacastZik"""
@@ -105,6 +108,7 @@ class YacastZik(YacastEvent):
             self.signaturePath = xmlMusic.signaturePath
         if hasattr(xmlMusic, 'idMedia'):
              self.idMedia = xmlMusic.idMedia
+
 
 # --- Load Yacast Advertising.xml files as array of YacastAd
 def loadAdvertisementList(path2xml):
