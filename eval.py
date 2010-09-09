@@ -37,7 +37,7 @@ class eval_result(object):
         self.bad3 = self.bad3 + other.bad3
         return self
 
-def eval_events(reference_events, submission_events):
+def eval_events(reference_events, submission_events, verbosity):
     """docstring for eval"""
     
     e = eval_result()
@@ -103,6 +103,8 @@ def eval_events(reference_events, submission_events):
         if cur_event.id != -1:
             if len(inter_events) == 0:
                 e.missed = e.missed + 1
+                if verbosity > 1:
+                    print cur_event.description() + " ==> MISS (#" + str(cur_event.id) + ")"# LOG
 
         # 'inter_counter[id]' is the number of time event with index 'id' is detected during 'cur_event'
         inter_counter = {} 
@@ -125,6 +127,11 @@ def eval_events(reference_events, submission_events):
         for cur_id in inter_counter.keys():
             # wrong detection
             if cur_id != cur_event.id:
+                if verbosity > 1:
+                    if cur_event.id == -1:
+                        print cur_event.description() + " ==> FALSE ALARM"
+                    else:
+                        print cur_event.description() + " ==> BAD DETECTION (#" + str(cur_id) + " INSTEAD OF #" + str(cur_event.id) + ")"# LOG
                 # activate error flag
                 local_bad1 = 1
                 # add one error per bad id
@@ -140,7 +147,7 @@ def eval_events(reference_events, submission_events):
         
     return e
     
-def eval_ads(path2xml_ad, path2xml_sub):
+def eval_ads(path2xml_ad, path2xml_sub, verbosity):
     """docstring for eval_ads"""
         
     # load reference advertisement XML
@@ -149,14 +156,14 @@ def eval_ads(path2xml_ad, path2xml_sub):
     submission = submissionIO.loadSubmission(path2xml_sub)
  
     # perform ad evaluation
-    e = eval_events(ads, submission.ad_list)
+    e = eval_events(ads, submission.ad_list, verbosity)
     
     e.participant = submission.participantId 
     e.submission = submission.submissionId
     
     return e
 
-def eval_zik(path2xml_zik, path2xml_sub):
+def eval_zik(path2xml_zik, path2xml_sub, verbosity):
     """docstring for eval_zik"""
 
     # load reference music XML
@@ -165,7 +172,7 @@ def eval_zik(path2xml_zik, path2xml_sub):
     submission = submissionIO.loadSubmission(path2xml_sub)
 
     # perform ad evaluation
-    e = eval_events(zik, submission.zik_list)
+    e = eval_events(zik, submission.zik_list, verbosity)
 
     e.participant = submission.participantId 
     e.submission = submission.submissionId
@@ -210,11 +217,11 @@ if __name__ == '__main__':
     	print "Error : no submission file submitted."
     	sys.exit(2)
     if len(path2xml_ad) != 0:
-    	ad = eval_ads(path2xml_ad, path2xml_sub)
+    	ad = eval_ads(path2xml_ad, path2xml_sub, 0)
     	print "Advertisement :", 
     	ad.show()
     if len(path2xml_zik) != 0:
-    	zik = eval_zik(path2xml_zik, path2xml_sub)
+    	zik = eval_zik(path2xml_zik, path2xml_sub, 0)
     	print "Music :", 
     	zik.show()
     
