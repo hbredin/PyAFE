@@ -13,8 +13,11 @@ class eval_result(object):
         self.missed = 0 
         self.good = 0 
         self.bad1 = 0 
+        self.hole_bad1 = 0
         self.bad2 = 0
+        self.hole_bad2 = 0
         self.bad3 = 0
+        self.hole_bad3 = 0
         pass
         
     def show(self):
@@ -22,7 +25,14 @@ class eval_result(object):
         print self.description()
         
     def description(self):
-        return self.participant + " " + self.submission + " | OK = " + str(self.good)  + " | Bad = " + str(self.bad1) + " - " + str(self.bad2) + " - " + str(self.bad3) + " | Missed = " + str(self.missed) + " | Total = " + str(self.number)
+        descr = self.participant + " " + self.submission
+        descr = descr + " | P2 = "       + "%+.3f" % (1.0*(self.good-self.bad2-self.hole_bad2)/self.number)
+        descr = descr + " | P3 = "       + "%+.3f" % (1.0*(self.good-self.bad3-self.hole_bad3)/self.number)  
+        descr = descr + " | P2.5 = "      + "%+.3f" % (1.0*(self.good-self.bad2-self.hole_bad3)/self.number)
+        descr = descr + " | Hit = "         + "%4d/%4d" % (self.good, self.number)
+        descr = descr + " | Miss = "        + "%4d" % (self.missed)
+        descr = descr + " | False Alarm = " + "[%3d+%3d / %3d+%3d / %3d+%3d]" % (self.bad1, self.hole_bad1, self.bad2, self.hole_bad2, self.bad3, self.hole_bad3)       
+        return  descr
       
     def add(self, other):
         if (other.participant != None):
@@ -33,8 +43,11 @@ class eval_result(object):
         self.missed = self.missed + other.missed
         self.good = self.good + other.good
         self.bad1 = self.bad1 + other.bad1
+        self.hole_bad1 = self.hole_bad1 + other.hole_bad1
         self.bad2 = self.bad2 + other.bad2
+        self.hole_bad2 = self.hole_bad2 + other.hole_bad2
         self.bad3 = self.bad3 + other.bad3
+        self.hole_bad3 = self.hole_bad3 + other.hole_bad3
         return self
 
 def eval_events(reference_events, submission_events, verbosity):
@@ -48,8 +61,11 @@ def eval_events(reference_events, submission_events, verbosity):
     e.missed = 0 # number of times nothing is detected
     e.good = 0 # number of times correct event is detected (common to all metrics)
     e.bad1 = 0 # number of bad detection (multiple bad detections for )
+    e.hole_bad1 = 0
     e.bad2 = 0
+    e.hole_bad2 = 0
     e.bad3 = 0
+    e.hole_bad3 = 0
 
     if len(submission_events) == 0:
         e.missed = e.number
@@ -121,29 +137,42 @@ def eval_events(reference_events, submission_events, verbosity):
             e.good = e.good + 1
         
         local_bad1 = 0
+        local_hole_bad1 = 0
         local_bad2 = 0
+        local_hole_bad2 = 0
         local_bad3 = 0
+        local_hole_bad3 = 0
 
         for cur_id in inter_counter.keys():
             # wrong detection
             if cur_id != cur_event.id:
                 if verbosity > 1:
                     if cur_event.id == -1:
-                        print cur_event.description() + " ==> FALSE ALARM"
+                        print cur_event.description() + " ==> FALSE ALARM (#" + str(cur_id) + " INSTEAD OF NO SONG)"
                     else:
-                        print cur_event.description() + " ==> BAD DETECTION (#" + str(cur_id) + " INSTEAD OF #" + str(cur_event.id) + ")"# LOG
-                # activate error flag
-                local_bad1 = 1
-                # add one error per bad id
-                # (only one error for multiple bad detections with same ad 'id')
-                local_bad2 = local_bad2 + 1
-                # add one error per bad detection
-                # (as many errors as bad detections)
-                local_bad3 = local_bad3 + inter_counter[ cur_id ]
+                        print cur_event.description() + " ==> FALSE ALARM (#" + str(cur_id) + " INSTEAD OF #" + str(cur_event.id) + ")"# LOG
+                
+                if cur_event.id == -1:
+                    local_hole_bad1 = 1
+                    local_hole_bad2 = local_hole_bad2 + 1
+                    local_hole_bad3 = local_hole_bad3 + inter_counter[ cur_id ]
+                else:
+                    # activate error flag
+                    local_bad1 = 1
+                    # add one error per bad id
+                    # (only one error for multiple bad detections with same ad 'id')
+                    local_bad2 = local_bad2 + 1
+                    # add one error per bad detection
+                    # (as many errors as bad detections)
+                    local_bad3 = local_bad3 + inter_counter[ cur_id ]
 
         e.bad1 = e.bad1 + local_bad1
         e.bad2 = e.bad2 + local_bad2
         e.bad3 = e.bad3 + local_bad3
+        e.hole_bad1 = e.hole_bad1 + local_hole_bad1
+        e.hole_bad2 = e.hole_bad2 + local_hole_bad2
+        e.hole_bad3 = e.hole_bad3 + local_hole_bad3
+
         
     return e
     
