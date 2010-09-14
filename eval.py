@@ -50,7 +50,7 @@ class eval_result(object):
         self.hole_bad3 = self.hole_bad3 + other.hole_bad3
         return self
 
-def eval_events(reference_events, submission_events, verbosity):
+def eval_events(reference_events, submission_events, skipTwoDaysEvents, verbosity):
     """docstring for eval"""
     
     e = eval_result()
@@ -60,7 +60,7 @@ def eval_events(reference_events, submission_events, verbosity):
     e.number = len(reference_events)
     e.missed = 0 # number of times nothing is detected
     e.good = 0 # number of times correct event is detected (common to all metrics)
-    e.bad1 = 0 # number of bad detection (multiple bad detections for )
+    e.bad1 = 0 
     e.hole_bad1 = 0
     e.bad2 = 0
     e.hole_bad2 = 0
@@ -112,6 +112,15 @@ def eval_events(reference_events, submission_events, verbosity):
     # for each event in reference
     for cur_event in filled_reference_events:
         
+        # check if reference event is fully included in one calendar day
+        # if it is not and user specifically asked not to evaluate this kind of events, skip it
+        if cur_event.isFullyIncludedInOneCalendarDay() == False:
+            if skipTwoDaysEvents:
+                e.number = e.number - 1 # decrement number of reference events
+                if verbosity > 1:
+                    print cur_event.description() + " ==> SKIP" # LOG
+                continue
+        
         # array 'inter_events' contains events that are detected during 'cur_event'
         inter_events = cur_event.findIntersectingEvents(submission_events)
         
@@ -120,7 +129,7 @@ def eval_events(reference_events, submission_events, verbosity):
             if len(inter_events) == 0:
                 e.missed = e.missed + 1
                 if verbosity > 1:
-                    print cur_event.description() + " ==> MISS (#" + str(cur_event.id) + ")"# LOG
+                    print cur_event.description() + " ==> MISS (#" + str(cur_event.id) + ")" # LOG
 
         # 'inter_counter[id]' is the number of time event with index 'id' is detected during 'cur_event'
         inter_counter = {} 
@@ -135,6 +144,8 @@ def eval_events(reference_events, submission_events, verbosity):
         # is 'cur_event' correctly detected?
         if cur_event.id in inter_counter.keys():
             e.good = e.good + 1
+            if verbosity > 2:
+                print cur_event.description() + " ==> HIT (#" + str(cur_event.id) + ")" # LOG
         
         local_bad1 = 0
         local_hole_bad1 = 0
@@ -176,7 +187,7 @@ def eval_events(reference_events, submission_events, verbosity):
         
     return e
     
-def eval_ads(path2xml_ad, path2xml_sub, verbosity):
+def eval_ads(path2xml_ad, path2xml_sub, skipTwoDaysEvents, verbosity):
     """docstring for eval_ads"""
         
     # load reference advertisement XML
@@ -185,14 +196,14 @@ def eval_ads(path2xml_ad, path2xml_sub, verbosity):
     submission = submissionIO.loadSubmission(path2xml_sub)
  
     # perform ad evaluation
-    e = eval_events(ads, submission.ad_list, verbosity)
+    e = eval_events(ads, submission.ad_list, skipTwoDaysEvents, verbosity)
     
     e.participant = submission.participantId 
     e.submission = submission.submissionId
     
     return e
 
-def eval_zik(path2xml_zik, path2xml_sub, verbosity):
+def eval_zik(path2xml_zik, path2xml_sub, skipTwoDaysEvents, verbosity):
     """docstring for eval_zik"""
 
     # load reference music XML
@@ -201,7 +212,7 @@ def eval_zik(path2xml_zik, path2xml_sub, verbosity):
     submission = submissionIO.loadSubmission(path2xml_sub)
 
     # perform ad evaluation
-    e = eval_events(zik, submission.zik_list, verbosity)
+    e = eval_events(zik, submission.zik_list, skipTwoDaysEvents, verbosity)
 
     e.participant = submission.participantId 
     e.submission = submission.submissionId
@@ -246,11 +257,11 @@ if __name__ == '__main__':
     	print "Error : no submission file submitted."
     	sys.exit(2)
     if len(path2xml_ad) != 0:
-    	ad = eval_ads(path2xml_ad, path2xml_sub, 0)
+    	ad = eval_ads(path2xml_ad, path2xml_sub, False, 0)
     	print "Advertisement :", 
     	ad.show()
     if len(path2xml_zik) != 0:
-    	zik = eval_zik(path2xml_zik, path2xml_sub, 0)
+    	zik = eval_zik(path2xml_zik, path2xml_sub, False, 0)
     	print "Music :", 
     	zik.show()
     
