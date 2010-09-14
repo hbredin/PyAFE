@@ -13,7 +13,7 @@ def getListOfRelativePathToFile( mydir, filename ):
     return fileList
 
 
-def full_eval_zik(path2groundtruth, path2submission, subname, partial, verbosity):
+def full_eval_zik(path2groundtruth, path2submission, subname, partial, skipTwoDaysEvents, verbosity):
     # Get list of annotation files
     gtname = "Music.xml"
     annFiles = getListOfRelativePathToFile( path2groundtruth, gtname )
@@ -29,13 +29,13 @@ def full_eval_zik(path2groundtruth, path2submission, subname, partial, verbosity
         if os.path.exists(path2xml_sub) == False:
             if partial == False:
                 print "%s > ERROR - missing submission file" % (os.path.join(annFile, gtname))
-                e = eval.eval_zik(path2xml_gt, None, verbosity)
+                e = eval.eval_zik(path2xml_gt, None, skipTwoDaysEvents, verbosity)
                 evalList.append(e)                
         else:
             if verbosity > 1:
                 print ""
                 print "#### %s ERROR LIST ####" % (os.path.join(annFile, gtname))
-            e = eval.eval_zik(path2xml_gt, path2xml_sub, verbosity)
+            e = eval.eval_zik(path2xml_gt, path2xml_sub, skipTwoDaysEvents, verbosity)
             if verbosity > 0:
                 print "%s > %s " % (os.path.join(annFile, gtname), e.description())
             evalList.append(e)
@@ -43,7 +43,7 @@ def full_eval_zik(path2groundtruth, path2submission, subname, partial, verbosity
     return evalList
 
 
-def full_eval_ads(path2groundtruth, path2submission, subname, partial, verbosity):
+def full_eval_ads(path2groundtruth, path2submission, subname, partial, skipTwoDaysEvents, verbosity):
     # Get list of annotation files
     gtname = "Advertising.xml"
     annFiles = getListOfRelativePathToFile( path2groundtruth, gtname )
@@ -59,13 +59,13 @@ def full_eval_ads(path2groundtruth, path2submission, subname, partial, verbosity
         if os.path.exists(path2xml_sub) == False:
             if partial == False:
                 print "%s > ERROR - missing submission file" % (os.path.join(annFile, gtname))
-                e = eval.eval_ads(path2xml_gt, None, verbosity)
+                e = eval.eval_ads(path2xml_gt, None, skipTwoDaysEvents, verbosity)
                 evalList.append(e) 
         else:
             if verbosity > 1:
                 print ""
                 print "#### %s ERROR LIST ####" % (os.path.join(annFile, gtname))
-            e = eval.eval_ads(path2xml_gt, path2xml_sub, verbosity)
+            e = eval.eval_ads(path2xml_gt, path2xml_sub, skipTwoDaysEvents, verbosity)
             if verbosity > 0:
                 print "%s > %s " % (os.path.join(annFile, gtname), e.description())
             evalList.append(e) 
@@ -80,6 +80,7 @@ def usage():
     print "  -m  --music        Only perform music evaluation"
     print "  -a  --ads          Only perform ads evaluation"
     print "  -p  --partial      Only evaluate available submission files"
+    print "  -d  --skip2days    Skip events that starts the day before or ends the day after"
     print "  -v  --verbosity    Set level of verbosity (default=0)"
     print "                     0 = only print global results"
     print "                     1 = same as 0 + print per-file results"
@@ -108,7 +109,7 @@ def usage():
 
 if __name__ == '__main__':
     try:
-    	opts, args = getopt.getopt(sys.argv[1:], "hampg:s:n:v:", ["help", "music", "ads", "partial", "groundtruth=", "submission=", "filename=", "verbosity="])
+    	opts, args = getopt.getopt(sys.argv[1:], "hampg:s:n:v:d", ["help", "music", "ads", "partial", "groundtruth=", "submission=", "filename=", "verbosity=", "skip2days"])
     except getopt.GetoptError, err:
     	# print help information and exit:
     	print str(err) # will print something like "option -a not recognized"
@@ -122,6 +123,7 @@ if __name__ == '__main__':
     zikOnly = False
     partial = False
     verbosity = 0
+    skipTwoDaysEvents = False
     # print opts
     # print args
     for opt, arg in opts:
@@ -140,6 +142,8 @@ if __name__ == '__main__':
     	    subName = arg
     	elif opt in ("-p", "--partial"):
     	    partial = True
+    	elif opt in ("-d", "--skip2days"):
+    	    skipTwoDaysEvents = True
     	elif opt in ("-v", "--verbosity"):
     	    verbosity = int(arg)
     	else:
@@ -156,7 +160,7 @@ if __name__ == '__main__':
         sys.exit(2)
 
     if adsOnly == False:
-        results_zik = full_eval_zik(path2groundtruth, path2submission, subName, partial, verbosity)
+        results_zik = full_eval_zik(path2groundtruth, path2submission, subName, partial, skipTwoDaysEvents, verbosity)
         global_zik = eval.eval_result()
         for r in results_zik:
             global_zik.add(r)
@@ -166,7 +170,7 @@ if __name__ == '__main__':
         global_zik.show()
         
     if zikOnly == False:
-        results_ads = full_eval_ads(path2groundtruth, path2submission, subName, partial, verbosity)
+        results_ads = full_eval_ads(path2groundtruth, path2submission, subName, partial, skipTwoDaysEvents, verbosity)
         global_ads = eval.eval_result()
         for r in results_ads:
             global_ads.add(r)
