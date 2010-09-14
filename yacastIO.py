@@ -45,6 +45,10 @@ class YacastEvent(object):
             startsBeforeOtherEnds = (cmp(self.dtStart, other.dtEnd) <= 0)
             return startsBeforeOtherEnds
 
+    def isFullyIncludedInOneCalendarDay(self):
+        """returns FALSE if event is not fully included in one calendar day"""
+        return self.dtStart.day == self.dtEnd.day
+
     def findIntersectingEvents(self, sorted_event_list):
         """docstring for findIntersectingEvents"""
         intersecting_events_list = []
