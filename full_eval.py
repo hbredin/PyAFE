@@ -81,8 +81,9 @@ def usage():
     print "  -a  --ads          Only perform ads evaluation"
     print "  -p  --partial      Only evaluate available submission files"
     print "  -d  --skip2days    Skip events that starts the day before or ends the day after"
-    print "  -v  --verbosity    Set level of verbosity (default=0)"
-    print "                     0 = only print global results"
+    print "  -v  --verbosity    Set level of verbosity (default=-1)"
+    print "                    -1 = only print global results"
+    print "                     0 = same as -1 + print command arguments"
     print "                     1 = same as 0 + print per-file results"
     print "                     2 = same as 1 + print list of errors"
     print "  -h, --help         Print this help"
@@ -122,7 +123,7 @@ if __name__ == '__main__':
     adsOnly = False
     zikOnly = False
     partial = False
-    verbosity = 0
+    verbosity = -1
     skipTwoDaysEvents = False
     # print opts
     # print args
@@ -148,6 +149,9 @@ if __name__ == '__main__':
     	    verbosity = int(arg)
     	else:
     		assert False, "unhandled option"
+
+    if (verbosity > -1):
+        print "$ " + ' '.join(sys.argv[0:])
 
     if len(path2submission) == 0:
     	print "Error : missing submission directory."
