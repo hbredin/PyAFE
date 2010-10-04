@@ -50,7 +50,7 @@ class eval_result(object):
         self.hole_bad3 = self.hole_bad3 + other.hole_bad3
         return self
 
-def eval_events(reference_events, submission_events, skipTwoDaysEvents, verbosity):
+def eval_events(reference_events, submission_events, skipTwoDaysEvents, fingerprints, verbosity):
     """docstring for eval"""
     
     e = eval_result()
@@ -121,6 +121,15 @@ def eval_events(reference_events, submission_events, skipTwoDaysEvents, verbosit
                     print cur_event.description() + " ==> SKIP" # LOG
                 continue
         
+        # if user asked to focus on a predefined list of fingerprints
+        # test if it is available
+        if fingerprints != {}:
+            if (cur_event.id != -1) and ((cur_event.id in fingerprints.keys()) == False):
+                e.number = e.number -1 # decrement number of reference events
+                if verbosity > 1:
+                    print cur_event.description() + " ==> NO FINGERPRINT (%s)" % (cur_event.id) # LOG
+                continue
+        
         # array 'inter_events' contains events that are detected during 'cur_event'
         inter_events = cur_event.findIntersectingEvents(submission_events)
         
@@ -187,7 +196,7 @@ def eval_events(reference_events, submission_events, skipTwoDaysEvents, verbosit
         
     return e
     
-def eval_ads(path2xml_ad, path2xml_sub, skipTwoDaysEvents, verbosity):
+def eval_ads(path2xml_ad, path2xml_sub, skipTwoDaysEvents, fingerprints, verbosity):
     """docstring for eval_ads"""
         
     # load reference advertisement XML
@@ -196,14 +205,14 @@ def eval_ads(path2xml_ad, path2xml_sub, skipTwoDaysEvents, verbosity):
     submission = submissionIO.loadSubmission(path2xml_sub)
  
     # perform ad evaluation
-    e = eval_events(ads, submission.ad_list, skipTwoDaysEvents, verbosity)
+    e = eval_events(ads, submission.ad_list, skipTwoDaysEvents, fingerprints, verbosity)
     
     e.participant = submission.participantId 
     e.submission = submission.submissionId
     
     return e
 
-def eval_zik(path2xml_zik, path2xml_sub, skipTwoDaysEvents, verbosity):
+def eval_zik(path2xml_zik, path2xml_sub, skipTwoDaysEvents, fingerprints, verbosity):
     """docstring for eval_zik"""
 
     # load reference music XML
@@ -212,7 +221,7 @@ def eval_zik(path2xml_zik, path2xml_sub, skipTwoDaysEvents, verbosity):
     submission = submissionIO.loadSubmission(path2xml_sub)
 
     # perform ad evaluation
-    e = eval_events(zik, submission.zik_list, skipTwoDaysEvents, verbosity)
+    e = eval_events(zik, submission.zik_list, skipTwoDaysEvents, fingerprints, verbosity)
 
     e.participant = submission.participantId 
     e.submission = submission.submissionId

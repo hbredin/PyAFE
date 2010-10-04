@@ -3,6 +3,13 @@ import sys
 import getopt
 import eval
 
+def getListOfFingerprints( path2fingerprint ):
+    f = open(path2fingerprint, 'r')
+    fingerprint = {}
+    for line in f:
+        fingerprint[ line.rstrip()] = 1
+    return fingerprint
+
 def getListOfRelativePathToFile( mydir, filename ):
     fileList = []
     rootdir = os.path.normpath(mydir)
@@ -13,7 +20,7 @@ def getListOfRelativePathToFile( mydir, filename ):
     return fileList
 
 
-def full_eval_zik(path2groundtruth, path2submission, subname, partial, skipTwoDaysEvents, verbosity):
+def full_eval_zik(path2groundtruth, path2submission, subname, partial, skipTwoDaysEvents, fingerprints, verbosity):
     # Get list of annotation files
     gtname = "Music.xml"
     annFiles = getListOfRelativePathToFile( path2groundtruth, gtname )
@@ -29,13 +36,13 @@ def full_eval_zik(path2groundtruth, path2submission, subname, partial, skipTwoDa
         if os.path.exists(path2xml_sub) == False:
             if partial == False:
                 print "%s > ERROR - missing submission file" % (os.path.join(annFile, gtname))
-                e = eval.eval_zik(path2xml_gt, None, skipTwoDaysEvents, verbosity)
+                e = eval.eval_zik(path2xml_gt, None, skipTwoDaysEvents, fingerprints, verbosity)
                 evalList.append(e)                
         else:
             if verbosity > 1:
                 print ""
                 print "#### %s ERROR LIST ####" % (os.path.join(annFile, gtname))
-            e = eval.eval_zik(path2xml_gt, path2xml_sub, skipTwoDaysEvents, verbosity)
+            e = eval.eval_zik(path2xml_gt, path2xml_sub, skipTwoDaysEvents, fingerprints, verbosity)
             if verbosity > 0:
                 print "%s > %s " % (os.path.join(annFile, gtname), e.description())
             evalList.append(e)
@@ -43,7 +50,7 @@ def full_eval_zik(path2groundtruth, path2submission, subname, partial, skipTwoDa
     return evalList
 
 
-def full_eval_ads(path2groundtruth, path2submission, subname, partial, skipTwoDaysEvents, verbosity):
+def full_eval_ads(path2groundtruth, path2submission, subname, partial, skipTwoDaysEvents, fingerprints, verbosity):
     # Get list of annotation files
     gtname = "Advertising.xml"
     annFiles = getListOfRelativePathToFile( path2groundtruth, gtname )
@@ -59,13 +66,13 @@ def full_eval_ads(path2groundtruth, path2submission, subname, partial, skipTwoDa
         if os.path.exists(path2xml_sub) == False:
             if partial == False:
                 print "%s > ERROR - missing submission file" % (os.path.join(annFile, gtname))
-                e = eval.eval_ads(path2xml_gt, None, skipTwoDaysEvents, verbosity)
+                e = eval.eval_ads(path2xml_gt, None, skipTwoDaysEvents, fingerprints, verbosity)
                 evalList.append(e) 
         else:
             if verbosity > 1:
                 print ""
                 print "#### %s ERROR LIST ####" % (os.path.join(annFile, gtname))
-            e = eval.eval_ads(path2xml_gt, path2xml_sub, skipTwoDaysEvents, verbosity)
+            e = eval.eval_ads(path2xml_gt, path2xml_sub, skipTwoDaysEvents, fingerprints, verbosity)
             if verbosity > 0:
                 print "%s > %s " % (os.path.join(annFile, gtname), e.description())
             evalList.append(e) 
@@ -81,6 +88,7 @@ def usage():
     print "  -a  --ads          Only perform ads evaluation"
     print "  -p  --partial      Only evaluate available submission files"
     print "  -d  --skip2days    Skip events that starts the day before or ends the day after"
+    print "  -f  --fingerprint  Path to list of available fingerprint"
     print "  -v  --verbosity    Set level of verbosity (default=-1)"
     print "                    -1 = only print global results"
     print "                     0 = same as -1 + print command arguments"
@@ -110,7 +118,7 @@ def usage():
 
 if __name__ == '__main__':
     try:
-    	opts, args = getopt.getopt(sys.argv[1:], "hampg:s:n:v:d", ["help", "music", "ads", "partial", "groundtruth=", "submission=", "filename=", "verbosity=", "skip2days"])
+    	opts, args = getopt.getopt(sys.argv[1:], "hampg:s:n:v:df:", ["help", "music", "ads", "partial", "groundtruth=", "submission=", "filename=", "verbosity=", "skip2days", "fingerprint="])
     except getopt.GetoptError, err:
     	# print help information and exit:
     	print str(err) # will print something like "option -a not recognized"
@@ -125,6 +133,7 @@ if __name__ == '__main__':
     partial = False
     verbosity = -1
     skipTwoDaysEvents = False
+    path2fingerprint = "";
     # print opts
     # print args
     for opt, arg in opts:
@@ -145,6 +154,8 @@ if __name__ == '__main__':
     	    partial = True
     	elif opt in ("-d", "--skip2days"):
     	    skipTwoDaysEvents = True
+    	elif opt in ("-f", "--fingerprint"):
+    	    path2fingerprint = arg
     	elif opt in ("-v", "--verbosity"):
     	    verbosity = int(arg)
     	else:
@@ -163,8 +174,13 @@ if __name__ == '__main__':
         print "Error : cannot use both --ads and --music options"    
         sys.exit(2)
 
+    fingerprints = {}
+    if len(path2fingerprint) != 0:
+        # load list of available fingerprints as dictionary 
+        fingerprints = getListOfFingerprints( path2fingerprint )
+
     if adsOnly == False:
-        results_zik = full_eval_zik(path2groundtruth, path2submission, subName, partial, skipTwoDaysEvents, verbosity)
+        results_zik = full_eval_zik(path2groundtruth, path2submission, subName, partial, skipTwoDaysEvents, fingerprints, verbosity)
         global_zik = eval.eval_result()
         for r in results_zik:
             global_zik.add(r)
@@ -174,7 +190,7 @@ if __name__ == '__main__':
         global_zik.show()
         
     if zikOnly == False:
-        results_ads = full_eval_ads(path2groundtruth, path2submission, subName, partial, skipTwoDaysEvents, verbosity)
+        results_ads = full_eval_ads(path2groundtruth, path2submission, subName, partial, skipTwoDaysEvents, fingerprints, verbosity)
         global_ads = eval.eval_result()
         for r in results_ads:
             global_ads.add(r)
