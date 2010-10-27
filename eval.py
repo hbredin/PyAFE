@@ -81,6 +81,7 @@ def eval_events(reference_events, submission_events, skipTwoDaysEvents, fingerpr
             hole.dtStart = prev_event.dtEnd
             hole.dtEnd   = next_event.dtStart
             hole.id      = -1
+            hole.adjudication = ""
             holes.append(hole)
     
     # add a hole at the beginning if submitted events starts before first reference event
@@ -91,6 +92,7 @@ def eval_events(reference_events, submission_events, skipTwoDaysEvents, fingerpr
         hole.dtStart = first_sub_event.dtStart
         hole.dtEnd = first_ref_event.dtStart
         hole.id = -1
+        hole.adjudication = ""
         holes.append(hole)
         
     # add a hole at the end if submitted events ends after last reference event
@@ -101,6 +103,7 @@ def eval_events(reference_events, submission_events, skipTwoDaysEvents, fingerpr
         hole.dtStart = last_ref_event.dtEnd
         hole.dtEnd = last_sub_event.dtEnd
         hole.id = -1
+        hole.adjudication = ""
         holes.append(hole)
         
     # add holes
@@ -111,6 +114,18 @@ def eval_events(reference_events, submission_events, skipTwoDaysEvents, fingerpr
 
     # for each event in reference
     for cur_event in filled_reference_events:
+        
+        if cur_event.adjudication == "BAD ANNOTATION":
+            if verbosity > 1:
+                print cur_event.description() + " ==> BAD ANNOTATION"
+            e.number = e.number - 1
+            cur_event.id = -1
+        
+        # if cur_event.adjudication == "DOUBLE ANNOTATION":
+        #     if verbosity > 1:
+        #         print cur_event.description() + " ==> SKIP (DOUBLE ANNOTATION)"
+        #     e.number = e.number - 1
+        #     continue
         
         # check if reference event is fully included in one calendar day
         # if it is not and user specifically asked not to evaluate this kind of events, skip it
