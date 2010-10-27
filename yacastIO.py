@@ -27,6 +27,12 @@ class YacastEvent(object):
                     tEvent = time.strptime(str(xmlEvent.eventDate), "%Y-%m-%d %H:%M:%S")
                     self.dtStart = datetime.datetime(*tEvent[0:6])
                     self.dtEnd = datetime.datetime(*tEvent[0:6])
+        
+            # Get adjudication error when available
+            if hasattr(xmlEvent, 'error'):
+                self.adjudication = xmlEvent.error
+            else:
+                self.adjudication = ""
     
     def timerange_description(self):
         """docstring for description"""
@@ -37,13 +43,23 @@ class YacastEvent(object):
     
     def intersects(self, other):
         """returns FALSE if intersection is empty, TRUE otherwise"""
-        startsBefore = (cmp(self.dtStart, other.dtStart) <= 0)
-        if startsBefore:
-            endsAfterOtherStarts = (cmp(self.dtEnd, other.dtStart) >= 0)
-            return endsAfterOtherStarts
+        """see doc/intersection.png for detail"""
+        """self = groundtruth / other = detected event"""        
+        if (cmp(other.dtStart, other.dtEnd) == 0):
+            fullyHappensAfterOther = (cmp(self.dtStart, other.dtStart) > 0)
+            happensBeforeOther = (cmp(self.dtEnd, other.dtStart) <= 0)
+            if fullyHappensAfterOther or happensBeforeOther:
+                return False
+            else:
+                return True 
         else:
-            startsBeforeOtherEnds = (cmp(self.dtStart, other.dtEnd) <= 0)
-            return startsBeforeOtherEnds
+            startsBeforeOtherStarts = (cmp(self.dtStart, other.dtStart) <= 0)    # does self starts before other starts?
+            endsAfterOtherStarts = (cmp(self.dtEnd, other.dtStart) >= 0)         # does self ends before other starts?
+            startsStrictlyBeforeOtherEnds = (cmp(self.dtStart, other.dtEnd) < 0) # does self starts strictly before other ends?
+            if startsBeforeOtherStarts:
+                return endsAfterOtherStarts
+            else:
+                return startsStrictlyBeforeOtherEnds
 
     def isFullyIncludedInOneCalendarDay(self):
         """returns FALSE if event is not fully included in one calendar day"""
