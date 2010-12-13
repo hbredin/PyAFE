@@ -21,50 +21,44 @@ from lxml import etree
 from lxml import objectify
 import time
 import datetime
-import yacastIO
+from yacastIO import *
 
 class Submission(object):
-    """docstring for Submission"""
-    def __init__(self, xmlroot):
+    """docstring for Submission"""    
+    def __init__(self, path2xml):
+        
         super(Submission, self).__init__()
+
+        self.ID = None
+        self.participant = None
+        self.detectionList = {}
+
+        if path2xml == None:
+            return self
         
+        xmlroot = objectify.parse(path2xml).getroot()
         if xmlroot == None:
-            self.submissionId = None
-            self.participantId = None
-            self.ad_list = []
-            self.zik_list = []
-        else:
-            if hasattr(xmlroot, 'submissionId'):
-                self.submissionId = xmlroot.submissionId
-            if hasattr(xmlroot, 'participantId'):
-                self.participantId = xmlroot.participantId
-
-            if hasattr(xmlroot, 'detectionList'):
-                if hasattr(xmlroot.detectionList, 'Advertisement'):
-                    all_ad = xmlroot.detectionList[0].Advertisement
-                else:
-                    all_ad = []
-                if hasattr(xmlroot.detectionList, 'MusicTrack'):
-                    all_zik = xmlroot.detectionList[0].MusicTrack
-                else:
-                    all_zik = []
+            return self
         
-            self.ad_list = []
-            for one_ad in all_ad:
-                self.ad_list.append(yacastIO.YacastAd(one_ad))
-            self.ad_list.sort(yacastIO.YacastEvent.compareDate)
-
-            self.zik_list = []
-            for one_zik in all_zik:
-                self.zik_list.append(yacastIO.YacastZik(one_zik))
-            self.zik_list.sort(yacastIO.YacastZik.compareDate)
-
-
-def loadSubmission(path2xml):
-    if path2xml == None:
-        return Submission(None)
-    else:
-        obj = objectify.parse(path2xml)
-        root = obj.getroot()
-        return Submission(root)
-
+        # Read submission identifier from XML file
+        if hasattr(xmlroot, 'submissionId'):
+            self.ID = xmlroot.submissionId
+        
+        # Read participant identifier from XML file
+        if hasattr(xmlroot, 'participantId'):
+            self.participant = xmlroot.participantId
+        
+        # Read list of detected events 
+        if hasattr(xmlroot, 'detectionList'):
+            # Loop on all elements in detection list
+            for element in xmlroot.detectionList.iterchildren():
+                # Get type of elements (e.g <MusicTrack> or <Advertisement>)
+                eventType = element.tag
+                # Creates new entry in dictionary if necessary
+                if eventType not in self.detectionList.keys():
+                    self.detectionList[eventType] = []
+                # Add element to the list of elements of this type
+                self.detectionList[eventType].append(YacastEvent(element))
+            # Sort 
+            for eventType in self.detectionList.keys():
+                self.detectionList[eventType].sort(YacastEvent.compareByDate)

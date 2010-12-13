@@ -22,42 +22,51 @@ from lxml import objectify
 import time
 import datetime
 
+# List of tags than can be used to indicate the event ID
+idTags = ['id', 'idMusic', 'idAd']
+
+# Format used by Yacast to store date/time
+yacastDateTimeFormat = "%Y-%m-%d %H:%M:%S"
+
 class YacastEvent(object):
-    """docstring for YacastEvent"""
+    """YacastEvent"""
     
     # Initializer    
     def __init__(self, xmlEvent):
+        
         super(YacastEvent, self).__init__()
         
-        if xmlEvent != None:
-            # Get start date/time when available
-            if hasattr(xmlEvent, 'startDate'):
-                tStart = time.strptime(str(xmlEvent.startDate), "%Y-%m-%d %H:%M:%S")
-                self.dtStart = datetime.datetime(*tStart[0:6])
+        self.dtStart = None
+        self.dtEnd = None
+        self.id = None
+        self.XML = xmlEvent
+
+        if xmlEvent == None:
+            return
         
-            # Get end date/time when available
-            if hasattr(xmlEvent, 'endDate'):
-                tEnd = time.strptime(str(xmlEvent.endDate), "%Y-%m-%d %H:%M:%S")
-                self.dtEnd = datetime.datetime(*tEnd[0:6])
-        
-            # Get event date/time only when start and stop date are not both available
-            if not(hasattr(self, 'dtStart')) or not(hasattr(self, 'dtStop')):
-                if hasattr(xmlEvent, 'eventDate'):
-                    tEvent = time.strptime(str(xmlEvent.eventDate), "%Y-%m-%d %H:%M:%S")
-                    self.dtStart = datetime.datetime(*tEvent[0:6])
-                    self.dtEnd = datetime.datetime(*tEvent[0:6])
-        
-            # Get adjudication error when available
-            if hasattr(xmlEvent, 'error'):
-                self.adjudication = xmlEvent.error
-            else:
-                self.adjudication = ""
+        # Get start date/time when available
+        if hasattr(xmlEvent, 'startDate'):
+            tStart = time.strptime(str(xmlEvent.startDate), yacastDateTimeFormat)
+            self.dtStart = datetime.datetime(*tStart[0:6])
     
-    def timerange_description(self):
-        """docstring for description"""
-        return self.dtStart.strftime("%H:%M:%S") + " - " + self.dtEnd.strftime("%H:%M:%S")
+        # Get end date/time when available
+        if hasattr(xmlEvent, 'endDate'):
+            tEnd = time.strptime(str(xmlEvent.endDate), yacastDateTimeFormat)
+            self.dtEnd = datetime.datetime(*tEnd[0:6])
+    
+        # Get event date/time when one of start/stop date is missing
+        if self.dtStart == None or self.dtEnd == None:
+            if hasattr(xmlEvent, 'eventDate'):
+                tEvent = time.strptime(str(xmlEvent.eventDate), yacastDateTimeFormat)
+                self.dtStart = datetime.datetime(*tEvent[0:6])
+                self.dtEnd = datetime.datetime(*tEvent[0:6])
+                
+        for element in xmlEvent.iterchildren():
+            if element.tag in idTags:
+                self.id = str(element)
         
-    def compareDate(self, other):
+                    
+    def compareByDate(self, other):
         return cmp(self.dtStart, other.dtStart)
     
     def intersects(self, other):
@@ -94,91 +103,71 @@ class YacastEvent(object):
     
     def description(self):
         return str(self.dtStart) + " > " + str(self.dtEnd) 
-        
 
-# Yacast Advertisement
-class YacastAd(YacastEvent):
-    """docstring for YacastAd"""
-    def __init__(self, xmlAdvertisement):
-        
-        # self = YacastEvent(xmlAdvertisement)
-        super(YacastAd, self).__init__(xmlAdvertisement)
-        
-        if hasattr(xmlAdvertisement, 'id'):
-            self.id = str(xmlAdvertisement.id)
-        if hasattr(xmlAdvertisement, 'idAd'):
-            self.id = str(xmlAdvertisement.idAd)        
-        if hasattr(xmlAdvertisement, 'idMedia'):
-            self.idMedia = xmlAdvertisement.idMedia
-        if hasattr(xmlAdvertisement, 'name'):
-            self.name = xmlAdvertisement.name
-        if hasattr(xmlAdvertisement, 'brand'):
-            self.brand = xmlAdvertisement.brand
-        if hasattr(xmlAdvertisement, 'advertiser'):
-            self.advertiser = xmlAdvertisement.advertiser
-        if hasattr(xmlAdvertisement, 'description'):
-            self.description = xmlAdvertisement.description
-        if hasattr(xmlAdvertisement, 'signatureFile'):
-            self.signatureFile = xmlAdvertisement.signatureFile
+def fillTimelineWithDummyEvent(eventList, dtStart, dtEnd, dummyID):
+    """fillTimelineWithDummyEvent"""
     
-# Yacast MusicTrack
-class YacastZik(YacastEvent):
-    """docstring for YacastZik"""
-    def __init__(self, xmlMusic):
+    dummies = []
+    
+    # Add a dummy event at the beginning
+    if cmp(dtStart, eventList[0].dtStart) < 0:
+        dummy = YacastEvent(None)
+        dummy.dtStart = dtStart
+        dummy.dtEnd   = eventList[0].dtStart
+        dummy.id      = dummyID
+        dummies.append(dummy)
         
-        # self = YacastEvent(xmlMusic)
-        super(YacastZik, self).__init__(xmlMusic)
+    # Add a dummy event at the end
+    if cmp(eventList[-1].dtEnd, dtEnd) < 0:
+        dummy = YacastEvent(None)
+        dummy.dtStart = eventList[-1].dtEnd
+        dummy.dtEnd   = dtEnd
+        dummy.id      = dummyID
+        dummies.append(dummy)
         
-        if hasattr(xmlMusic, 'id'):
-            self.id = str(xmlMusic.id)
-        if hasattr(xmlMusic, 'idMusic'):
-            self.id = str(xmlMusic.idMusic)        
-        if hasattr(xmlMusic, 'title'):
-            self.title = xmlMusic.title
-        if hasattr(xmlMusic, 'artist'):
-            self.artist = xmlMusic.artist
-        if hasattr(xmlMusic, 'label'):
-            self.label = xmlMusic.label
-        if hasattr(xmlMusic, 'genre'):
-            self.genre = xmlMusic.genre
-        if hasattr(xmlMusic, 'fileName'):
-            self.fileName = xmlMusic.fileName
-        if hasattr(xmlMusic, 'signaturePath'):
-            self.signaturePath = xmlMusic.signaturePath
-        if hasattr(xmlMusic, 'idMedia'):
-             self.idMedia = xmlMusic.idMedia
+    # Fill holes with dummy events
+    for i in range(1, len(eventList)):
+        leftEvent  = eventList[i-1]
+        rightEvent = eventList[i]
+        if cmp(leftEvent.dtEnd, rightEvent.dtStart) < 0:
+            dummy = YacastEvent(None)
+            dummy.dtStart = leftEvent.dtEnd
+            dummy.dtEnd   = rightEvent.dtStart
+            dummy.id      = dummyID
+            dummies.append(dummy)
+    
+    modifiedEventList = []
+    for e in eventList:
+        modifiedEventList.append(e)
+    for d in dummies:
+        modifiedEventList.append(d)
+    modifiedEventList.sort(YacastEvent.compareByDate)
+    
+    return modifiedEventList
 
-
-# --- Load Yacast Advertising.xml files as array of YacastAd
-def loadAdvertisementList(path2xml):
-    obj = objectify.parse(path2xml)
-    root = obj.getroot()
-    if hasattr( root, 'Advertisement'):
-        allAds = root.Advertisement
-    else:
-        allAds = []
-    
-    numAd = len(allAds)
-    adsList = []
-    for oneAd in allAds:
-        adsList.append(YacastAd(oneAd))
-    
-    adsList.sort(YacastEvent.compareDate)
-    return adsList
-
-# --- Load Yacast Music.xml files as array of YacastZik
-def loadMusicList(path2xml):
-    obj = objectify.parse(path2xml)
-    root = obj.getroot()
-    if hasattr(root, 'MusicTrack'):
-        allMusics = root.MusicTrack
-    else:
-        allMusics = []    
-    
-    numMusic = len(allMusics)
-    musicsList = []
-    for oneMusic in allMusics:
-        musicsList.append(YacastZik(oneMusic))
-    
-    musicsList.sort(YacastEvent.compareDate)
-    return musicsList    
+class YacastAnnotations(object):
+    """YacastAnnotations"""
+    def __init__(self, path2xml):
+        super(YacastAnnotations, self).__init__()
+        
+        self.eventList = {}
+        
+        if path2xml == None:
+            return self
+        
+        xmlroot = objectify.parse(path2xml).getroot()
+        if xmlroot == None:
+            return self
+                
+        # Loop on all elements in detection list
+        for element in xmlroot.iterchildren():
+            # Get type of elements (e.g <MusicTrack> or <Advertisement>)
+            eventType = element.tag
+            # Creates new entry in dictionary if necessary
+            if eventType not in self.eventList.keys():
+                self.eventList[eventType] = []
+            # Add element to the list of elements of this type
+            self.eventList[eventType].append(YacastEvent(element))
+        for eventType in self.eventList.keys():
+            self.eventList[eventType].sort(YacastEvent.compareByDate)
+        
