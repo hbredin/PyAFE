@@ -18,7 +18,13 @@
 
 == REQUIREMENTS == 
 
+* Python 2.7 or later
+* lxml 2.2.6 or later, http://codespeak.net/lxml/
+
 == RELEASE NOTES ==
+
+* Version 0.5.1 - 14/12/2010
+    Updated sample data
 
 * Version 0.5.0 - 14/12/2010
 	First public release 
