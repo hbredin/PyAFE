@@ -26,7 +26,7 @@ import datetime
 idTags = ['id', 'idMusic', 'idAd']
 
 # Format used by Yacast to store date/time
-yacastDateTimeFormat = "%Y-%m-%d %H:%M:%S"
+yacastDateTimeFormat = "%Y-%m-%d %H:%M:%S.%f"
 
 class YacastEvent(object):
     """YacastEvent"""
@@ -46,20 +46,16 @@ class YacastEvent(object):
         
         # Get start date/time when available
         if hasattr(xmlEvent, 'startDate'):
-            tStart = time.strptime(str(xmlEvent.startDate), yacastDateTimeFormat)
-            self.dtStart = datetime.datetime(*tStart[0:6])
-    
+            self.dtStart = datetime.datetime.strptime(str(xmlEvent.startDate), yacastDateTimeFormat)
         # Get end date/time when available
         if hasattr(xmlEvent, 'endDate'):
-            tEnd = time.strptime(str(xmlEvent.endDate), yacastDateTimeFormat)
-            self.dtEnd = datetime.datetime(*tEnd[0:6])
-    
+            self.dtEnd = datetime.datetime.strptime(str(xmlEvent.endDate), yacastDateTimeFormat)
+            
         # Get event date/time when one of start/stop date is missing
         if self.dtStart == None or self.dtEnd == None:
             if hasattr(xmlEvent, 'eventDate'):
-                tEvent = time.strptime(str(xmlEvent.eventDate), yacastDateTimeFormat)
-                self.dtStart = datetime.datetime(*tEvent[0:6])
-                self.dtEnd = datetime.datetime(*tEvent[0:6])
+                self.dtStart = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastDateTimeFormat)
+                self.dtEnd = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastDateTimeFormat)
                 
         for element in xmlEvent.iterchildren():
             if element.tag in idTags:
