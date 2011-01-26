@@ -1,4 +1,4 @@
-# Copyright 2010 Herve BREDIN (bredin@limsi.fr)
+# Copyright 2010-2011 Herve BREDIN (bredin@limsi.fr)
 # Contact: http://pyafe.niderb.fr/
 
 # This file is part of PyAFE.

@@ -1,4 +1,4 @@
-# Copyright 2010 Herve BREDIN (bredin@limsi.fr)
+# Copyright 2010-2011 Herve BREDIN (bredin@limsi.fr)
 # Contact: http://pyafe.niderb.fr/
 
 # This file is part of PyAFE.
@@ -22,6 +22,10 @@
 * lxml 2.2.6 or later, http://codespeak.net/lxml/
 
 == RELEASE NOTES ==
+
+* Version 0.5.2 - 26/01/2011
+	Date/time format has changed. Microseconds are now mandatory.
+	Updated sample data accordingly.
 
 * Version 0.5.1 - 14/12/2010
     Updated sample data
