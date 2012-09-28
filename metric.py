@@ -73,7 +73,7 @@ def compute_metric(reference_events, submission_events, options):
     e.fa1_out = 0
         
     dtStart = reference_events[0].dtStart.replace(hour=0, minute=0, second=0, microsecond=0)
-    dtEnd = reference_events[-1].dtEnd.replace(hour=0, minute=0, second=0, microsecond=0, day=reference_events[-1].dtEnd.day+1)
+    dtEnd = reference_events[-1].dtEnd.replace(hour=23, minute=59, second=59, microsecond=99999)
     filled_reference_events = fillTimelineWithDummyEvent(reference_events, dtStart, dtEnd, PyAFE_fillerID)
 
     # for each event in reference
