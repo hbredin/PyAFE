@@ -59,11 +59,17 @@ class YacastEvent(object):
             except ValueError:
 				self.dtEnd = datetime.datetime.strptime(str(xmlEvent.endDate), yacastAltDateTimeFormat)
 
-        # Get event date/time when one of start/stop date is missing
+        # Get event date/time when one of start/stop date is missing (condidering yacastDateTimeFormat or yacastAltDateTimeFormat)
         if self.dtStart == None or self.dtEnd == None:
             if hasattr(xmlEvent, 'eventDate'):
-                self.dtStart = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastDateTimeFormat)
-                self.dtEnd = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastDateTimeFormat)
+                try:
+					self.dtStart = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastDateTimeFormat)
+				except ValueError:
+					self.dtStart = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastAltDateTimeFormat)
+				try:
+					self.dtEnd = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastDateTimeFormat)
+				except ValueError:
+					self.dtEnd = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastAltDateTimeFormat)
                 
         for element in xmlEvent.iterchildren():
             if element.tag in idTags:
