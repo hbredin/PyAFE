@@ -48,28 +48,28 @@ class YacastEvent(object):
         # Get start date/time when available (condidering yacastDateTimeFormat or yacastAltDateTimeFormat)
         if hasattr(xmlEvent, 'startDate'):
             try:
-				self.dtStart = datetime.datetime.strptime(str(xmlEvent.startDate), yacastDateTimeFormat)
+                self.dtStart = datetime.datetime.strptime(str(xmlEvent.startDate), yacastDateTimeFormat)
             except ValueError:
                 self.dtStart = datetime.datetime.strptime(str(xmlEvent.startDate), yacastAltDateTimeFormat)
 
         # Get end date/time when available (condidering yacastDateTimeFormat or yacastAltDateTimeFormat)
         if hasattr(xmlEvent, 'endDate'):
             try:
-				self.dtEnd = datetime.datetime.strptime(str(xmlEvent.endDate), yacastDateTimeFormat)
+                self.dtEnd = datetime.datetime.strptime(str(xmlEvent.endDate), yacastDateTimeFormat)
             except ValueError:
-				self.dtEnd = datetime.datetime.strptime(str(xmlEvent.endDate), yacastAltDateTimeFormat)
+                self.dtEnd = datetime.datetime.strptime(str(xmlEvent.endDate), yacastAltDateTimeFormat)
 
         # Get event date/time when one of start/stop date is missing (condidering yacastDateTimeFormat or yacastAltDateTimeFormat)
         if self.dtStart == None or self.dtEnd == None:
             if hasattr(xmlEvent, 'eventDate'):
                 try:
-					self.dtStart = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastDateTimeFormat)
-				except ValueError:
-					self.dtStart = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastAltDateTimeFormat)
-				try:
-					self.dtEnd = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastDateTimeFormat)
-				except ValueError:
-					self.dtEnd = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastAltDateTimeFormat)
+                    self.dtStart = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastDateTimeFormat)
+                except ValueError:
+                    self.dtStart = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastAltDateTimeFormat)
+                try:
+                    self.dtEnd = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastDateTimeFormat)
+                except ValueError:
+                    self.dtEnd = datetime.datetime.strptime(str(xmlEvent.eventDate), yacastAltDateTimeFormat)
                 
         for element in xmlEvent.iterchildren():
             if element.tag in idTags:
