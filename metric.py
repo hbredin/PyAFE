@@ -121,7 +121,12 @@ def compute_metric(reference_events, submission_events, options):
             e.good = e.good + 1
             if options.verbosity > 2:
                 print cur_event.description() + " ==> HIT (#" + str(cur_event.id) + ")" # LOG
-        
+
+        # 'missed' is also incremented if some events are detected during 'cur_event', but not the right one
+        # Nothing is printed, it corresponds to the case "FALSE ALARM (# X INSTEAD OF # cur_event)"
+        if (cur_event.id not in inter_counter.keys()) and (len(inter_events) > 0) and (cur_event.id != PyAFE_fillerID):
+            e.missed = e.missed + 1       
+
         local_fa2 = 0
         local_fa2_out = 0
         local_fa1 = 0
