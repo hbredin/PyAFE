@@ -23,6 +23,10 @@
 
 == RELEASE NOTES ==
 
+* Version 0.5.3 - 04/12/2012
+	Acceptation of both Date/time format.
+	Correction of missed discounting.
+
 * Version 0.5.2 - 26/01/2011
 	Date/time format has changed. Microseconds are now mandatory.
 	Updated sample data accordingly.
