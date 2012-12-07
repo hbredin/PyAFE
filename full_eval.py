@@ -20,6 +20,7 @@
 import os
 import sys
 import getopt
+import re
 
 import metric
 import yacastIO
@@ -51,6 +52,31 @@ def evaluateFile( groundTruthFile, submissionFile, options):
     
     # Annotations (dictonary, one entry per event type)
     groundtruth = yacastIO.YacastAnnotations(groundTruthFile)
+
+    # Read start time and end time day restriction
+    if options.limitedhours:
+            # Faire la lecture des valeurs de debut et fin et les faire passer dans options 
+            # Read
+            f = open(options.path2xml_ts, 'r')
+            string_start=f.readline()
+            string_end=f.readline()
+            f.close()
+
+            # Check format
+            if (re.match(r'\d{2}:\d{2}:\d{2}',string_start)) and (re.match(r'\d{2}:\d{2}:\d{2}',string_end)):
+                list_start=re.split(r':',string_start)
+                list_end=re.split(r':',string_end)
+            else:
+		print "%s > ERROR - Start time (or End time) should be formated as HH:MM:SS" % (options.path2xml_ts)
+                return None
+
+	    # Write data in options
+            options.startH=int(list_start[0])
+            options.startM=int(list_start[1])
+            options.startS=int(list_start[2])
+            options.endH=int(list_end[0])
+            options.endM=int(list_end[1])
+            options.endS=int(list_end[2])
     # Detections (dictionary, one entry per event type)
     submission  = submissionIO.Submission(submissionFile)
     
@@ -79,6 +105,9 @@ def evaluateDirectory(groundTruthDir, groundTruthFileName, submissionDir, submis
     for groundTruthFile in groundTruthFiles:
         # Full path to groundtruth XML file
         path2xml_gt = os.path.join(groundTruthDir, groundTruthFile, groundTruthFileName)
+        if options.limitedhours:
+            # Full path to groundtruth time slot file
+            options.path2xml_ts = os.path.join(groundTruthDir, groundTruthFile, "TimeSlot.txt")
         # Full path to corresponding submission XML file
         path2xml_sub = os.path.join(submissionDir, groundTruthFile, submissionFileName)
     
@@ -114,6 +143,8 @@ def usage():
     print "  -p  --partial      Only evaluate available submission files"
     print "  -d  --skip2days    Skip events that starts the day before or ends the day after"
     print "  -f  --fingerprint  Path to list of available fingerprint"
+    print "  -l  --limited-hours"
+    print "                     Only evaluate on some chosen Time Slots. These time slots should be provided in TimeSlot.txt files, one for each GROUNDTRUTH file, located on the same directory than the corresponding MUSIC.xml GROUNDTRUTH file"
     print "  -v  --verbosity    Set level of verbosity (default=-1)"
     print "                    -1 = only print global results"
     print "                     0 = same as -1 + print command arguments"
@@ -142,7 +173,7 @@ def usage():
 
 if __name__ == '__main__':
     try:
-    	opts, args = getopt.getopt(sys.argv[1:], "hpg:G:s:S:v:df:", ["help", "partial", "groundtruth=", "groundtruth-filename=", "submission=", "submission-filename=", "verbosity=", "skip2days", "fingerprint="])
+    	opts, args = getopt.getopt(sys.argv[1:], "hpg:G:s:S:v:df:l", ["help", "partial", "groundtruth=", "groundtruth-filename=", "submission=", "submission-filename=", "verbosity=", "skip2days", "fingerprint=","limited-hours"])
     except getopt.GetoptError, err:
     	# print help information and exit:
     	print str(err) # will print something like "option -a not recognized"
@@ -157,6 +188,7 @@ if __name__ == '__main__':
     options.partial = False
     options.verbosity = -1
     options.skipTwoDaysEvents = False
+    options.limitedhours = False
     path2fingerprint = "";
     for opt, arg in opts:
     	if opt in ("-h", "--help"):
@@ -178,6 +210,8 @@ if __name__ == '__main__':
     	    path2fingerprint = arg
     	elif opt in ("-v", "--verbosity"):
     	    options.verbosity = int(arg)
+    	elif opt in ("-l", "--limited-hours"):
+    		options.limitedhours = True
     	else:
     		assert False, "unhandled option"
 

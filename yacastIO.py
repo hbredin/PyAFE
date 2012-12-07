@@ -118,11 +118,20 @@ def fillTimelineWithDummyEvent(eventList, dtStart, dtEnd, dummyID):
     """fillTimelineWithDummyEvent"""
     
     dummies = []
+
+    # Search the first event in the time range
+    while cmp(dtStart,eventList[0].dtEnd) > 0:
+        eventList.pop(0)
+        
+    # Search the last event in the time range
+    while cmp(dtEnd,eventList[-1].dtStart) < 0:
+        eventList.pop()
     
     # Add a dummy event at the beginning
     if cmp(dtStart, eventList[0].dtStart) < 0:
         dummy = YacastEvent(None)
         dummy.dtStart = dtStart
+
         dummy.dtEnd   = eventList[0].dtStart
         dummy.id      = dummyID
         dummies.append(dummy)

@@ -1,4 +1,4 @@
-# Copyright 2010-2011 Herve BREDIN (bredin@limsi.fr)
+# Copyright 2010-2012 Herve BREDIN (bredin@limsi.fr)
 # Contact: http://pyafe.niderb.fr/
 
 # This file is part of PyAFE.
@@ -22,6 +22,10 @@
 * lxml 2.2.6 or later, http://codespeak.net/lxml/
 
 == RELEASE NOTES ==
+
+* Version 0.6.0 - 07/12/2012
+	Add an option in order to limit de time range used for evaluation.
+	A file TimeSlot.txt must be present near de groundthruth file.
 
 * Version 0.5.3 - 04/12/2012
 	Acceptation of both Date/time format.
