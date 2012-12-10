@@ -63,25 +63,25 @@ def compute_metric(reference_events, submission_events, options):
     e = Metric()
 
     if options.limitedhours:
-	dtStart = reference_events[0].dtStart.replace(hour=options.startH, minute=options.startM, second=options.startS, microsecond=0)
-	dtEnd = reference_events[-1].dtEnd.replace(hour=options.endH, minute=options.endM, second=options.endS, microsecond=99999)
+        dtStart = reference_events[0].dtStart.replace(hour=options.startH, minute=options.startM, second=options.startS, microsecond=0)
+        dtEnd = reference_events[-1].dtEnd.replace(hour=options.endH, minute=options.endM, second=options.endS, microsecond=99999)
     else:
         dtStart = reference_events[0].dtStart.replace(hour=0, minute=0, second=0, microsecond=0)
         dtEnd = reference_events[-1].dtEnd.replace(hour=23, minute=59, second=59, microsecond=99999)
 
     # Check that dtStart < dtEnd in TimeSlot.txt (useful if -l option is provided)
-    if cmp(dtStart,dtEnd) > 0:
+    if options.limitedhours and cmp(dtStart,dtEnd) > 0:
         print "%s > ERROR - Start time should be before End time" % (options.path2xml_ts)
         return None
 
     # Check that reference_events[0].dtStart < option.dtStart < reference_events[-1].dtEnd
-    if (cmp(dtStart, reference_events[0].dtStart) < 0) or (cmp(dtStart, reference_events[-1].dtEnd) > 0): 
-	print "%s > ERROR - Start time should be between reference start (%s) and reference end (%s)" % (options.path2xml_ts,str(reference_events[0].dtStart),str(reference_events[-1].dtEnd))
+    if options.limitedhours and ((cmp(dtStart, reference_events[0].dtStart) < 0) or (cmp(dtStart, reference_events[-1].dtEnd) > 0)):
+        print "%s > ERROR - Start time should be between reference start (%s) and reference end (%s)" % (options.path2xml_ts,str(reference_events[0].dtStart),str(reference_events[-1].dtEnd))
         return None
 
     # Check that reference_events[0].dtStart < option.dtEnd < reference_events[-1].dtEnd
-    if (cmp(dtEnd, reference_events[0].dtStart) < 0) or (cmp(dtEnd, reference_events[-1].dtEnd) > 0): 
-	print "%s > ERROR - End time should be between reference start (%s) and reference end (%s)" % (options.path2xml_ts,reference_events[0].dtStart.strftime('%H:%M:%S'),reference_events[-1].dtEnd.strftime('%H:%M:%S'))
+    if options.limitedhours and ((cmp(dtEnd, reference_events[0].dtStart) < 0) or (cmp(dtEnd, reference_events[-1].dtEnd) > 0)): 
+        print "%s > ERROR - End time should be between reference start (%s) and reference end (%s)" % (options.path2xml_ts,reference_events[0].dtStart.strftime('%H:%M:%S'),reference_events[-1].dtEnd.strftime('%H:%M:%S'))
         return None
 
     filled_reference_events = fillTimelineWithDummyEvent(reference_events, dtStart, dtEnd, PyAFE_fillerID)

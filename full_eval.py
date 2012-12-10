@@ -2,17 +2,17 @@
 # Contact: http://pyafe.niderb.fr/
 
 # This file is part of PyAFE.
-# 
+#
 #     PyAFE is free software: you can redistribute it and/or modify
 #     it under the terms of the GNU General Public License as published by
 #     the Free Software Foundation, either version 3 of the License, or
 #     (at your option) any later version.
-# 
+#
 #     PyAFE is distributed in the hope that it will be useful,
 #     but WITHOUT ANY WARRANTY; without even the implied warranty of
 #     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 #     GNU General Public License for more details.
-# 
+#
 #     You should have received a copy of the GNU General Public License
 #     along with PyAFE.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -52,25 +52,25 @@ def evaluateFile( groundTruthFile, submissionFile, options):
     
     # Annotations (dictonary, one entry per event type)
     groundtruth = yacastIO.YacastAnnotations(groundTruthFile)
-
+    
     # Read start time and end time day restriction
     if options.limitedhours:
-            # Faire la lecture des valeurs de debut et fin et les faire passer dans options 
+            # Faire la lecture des valeurs de debut et fin et les faire passer dans options
             # Read
             f = open(options.path2xml_ts, 'r')
             string_start=f.readline()
             string_end=f.readline()
             f.close()
-
+            
             # Check format
             if (re.match(r'\d{2}:\d{2}:\d{2}',string_start)) and (re.match(r'\d{2}:\d{2}:\d{2}',string_end)):
                 list_start=re.split(r':',string_start)
                 list_end=re.split(r':',string_end)
             else:
-		print "%s > ERROR - Start time (or End time) should be formated as HH:MM:SS" % (options.path2xml_ts)
+                print "%s > ERROR - Start time (or End time) should be formated as HH:MM:SS" % (options.path2xml_ts)
                 return None
-
-	    # Write data in options
+        
+        # Write data in options
             options.startH=int(list_start[0])
             options.startM=int(list_start[1])
             options.startS=int(list_start[2])
@@ -110,7 +110,7 @@ def evaluateDirectory(groundTruthDir, groundTruthFileName, submissionDir, submis
             options.path2xml_ts = os.path.join(groundTruthDir, groundTruthFile, "TimeSlot.txt")
         # Full path to corresponding submission XML file
         path2xml_sub = os.path.join(submissionDir, groundTruthFile, submissionFileName)
-    
+        
         # Make sure it exists
         if os.path.exists(path2xml_sub) == False:
             if options.partial == False:
@@ -129,9 +129,9 @@ def evaluateDirectory(groundTruthDir, groundTruthFileName, submissionDir, submis
                 if eventType not in results.keys():
                     results[eventType] = []
                 results[eventType].append(result[eventType])
-
+    
     return results
-                
+
 def usage():
     print "HELP full_eval.py :"
     print "  -g, --groundtruth  Path to groundtruth directory"
@@ -155,14 +155,14 @@ def usage():
     print ""
     print "OUTPUT FORMAT"
     print "$ParticipantID$ $RunID$ | $EventType$ | Hit (Miss) / Total => $Hit$ ($Miss$) / $Total$ | FA1 (out) = $FA1$ ($FA1out$) | FA2 (out) = $FA2$ ($FA2out$) | R1 = $R1$ | R2 = $R2$ | R1.5 = $R1.5$"
-    print "  $ParticipantID$: participant ID (from XML submission files)" 
+    print "  $ParticipantID$: participant ID (from XML submission files)"
     print "  $RunID$: run ID (from XML submission files)"
     print "  $Hit$: number of hits (correct detection)"
     print "  $Total$: number of events to be detected"
     print "  $Miss$: number of misses"
-    print "  $R1$: performance metric 2 ($Hit$ - $FA1$ - $FA1out$) / $Total$" 
+    print "  $R1$: performance metric 2 ($Hit$ - $FA1$ - $FA1out$) / $Total$"
     print "  $R2$: performance metric 3 ($Hit$ - $FA2$ - $FA2out$) / $Total$"
-    print "  $R1.5$: hybrid performance metric ($Hit$ - $FA2$ - $FA1out$) / $Total$" 
+    print "  $R1.5$: hybrid performance metric ($Hit$ - $FA2$ - $FA1out$) / $Total$"
     
     print "  $FA1$: number of false alarms (+1 for every incorrect detection)"
     print "         e.g.: If Detected = B C B and Groundtruth = A, then $FA1$ = 3"
@@ -173,13 +173,13 @@ def usage():
 
 if __name__ == '__main__':
     try:
-    	opts, args = getopt.getopt(sys.argv[1:], "hpg:G:s:S:v:df:l", ["help", "partial", "groundtruth=", "groundtruth-filename=", "submission=", "submission-filename=", "verbosity=", "skip2days", "fingerprint=","limited-hours"])
+        opts, args = getopt.getopt(sys.argv[1:], "hpg:G:s:S:v:df:l", ["help", "partial", "groundtruth=", "groundtruth-filename=", "submission=", "submission-filename=", "verbosity=", "skip2days", "fingerprint=","limited-hours"])
     except getopt.GetoptError, err:
-    	# print help information and exit:
-    	print str(err) # will print something like "option -a not recognized"
-    	usage()
-    	sys.exit(2)
-    		
+        # print help information and exit:
+        print str(err) # will print something like "option -a not recognized"
+        usage()
+        sys.exit(2)
+    
     path2groundtruth = "";
     path2submission = "";
     gtName  = "Music.xml"
@@ -191,45 +191,45 @@ if __name__ == '__main__':
     options.limitedhours = False
     path2fingerprint = "";
     for opt, arg in opts:
-    	if opt in ("-h", "--help"):
-    		usage()
-    		sys.exit()
-    	elif opt in ("-g", "--groundtruth"):
-    		path2groundtruth = arg
-    	elif opt in ("-G", "--groundtruth-filename"):
-    	    gtName = arg
-    	elif opt in ("-s", "--submission"):
-    		path2submission = arg
-    	elif opt in ("-S", "--submission-filename"):
-    	    subName = arg
-    	elif opt in ("-p", "--partial"):
-    	    partial = True
-    	elif opt in ("-d", "--skip2days"):
-    	    options.skipTwoDaysEvents = True
-    	elif opt in ("-f", "--fingerprint"):
-    	    path2fingerprint = arg
-    	elif opt in ("-v", "--verbosity"):
-    	    options.verbosity = int(arg)
-    	elif opt in ("-l", "--limited-hours"):
-    		options.limitedhours = True
-    	else:
-    		assert False, "unhandled option"
-
+        if opt in ("-h", "--help"):
+            usage()
+            sys.exit()
+        elif opt in ("-g", "--groundtruth"):
+            path2groundtruth = arg
+        elif opt in ("-G", "--groundtruth-filename"):
+            gtName = arg
+        elif opt in ("-s", "--submission"):
+            path2submission = arg
+        elif opt in ("-S", "--submission-filename"):
+            subName = arg
+        elif opt in ("-p", "--partial"):
+            partial = True
+        elif opt in ("-d", "--skip2days"):
+            options.skipTwoDaysEvents = True
+        elif opt in ("-f", "--fingerprint"):
+            path2fingerprint = arg
+        elif opt in ("-v", "--verbosity"):
+            options.verbosity = int(arg)
+        elif opt in ("-l", "--limited-hours"):
+            options.limitedhours = True
+        else:
+            assert False, "unhandled option"
+    
     if (options.verbosity > -1):
         print "$ " + ' '.join(sys.argv[0:])
-
+    
     if len(path2submission) == 0:
-    	print "Error : missing submission directory."
-    	sys.exit(2)
+        print "Error : missing submission directory."
+        sys.exit(2)
     if len(path2groundtruth) == 0:
         print "Error : missing groundtruth directory."
         sys.exit(2)
-
+    
     options.fingerprints = {}
     if len(path2fingerprint) != 0:
-        # load list of available fingerprints as dictionary 
+        # load list of available fingerprints as dictionary
         options.fingerprints = getListOfFingerprints( path2fingerprint )
-
+    
     results = evaluateDirectory(path2groundtruth, gtName, path2submission, subName, options)
     
     metrics = {}
