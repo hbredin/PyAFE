@@ -23,6 +23,10 @@
 
 == RELEASE NOTES ==
 
+* Version 0.6.1 - 11/12/2012
+	Corrected the previous time range option (in case no time range is required).
+	Added a filter on the idMedia of the submission files.
+
 * Version 0.6.0 - 07/12/2012
 	Add an option in order to limit de time range used for evaluation.
 	A file TimeSlot.txt must be present near de groundthruth file.
