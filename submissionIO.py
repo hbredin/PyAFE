@@ -22,6 +22,8 @@ from lxml import objectify
 import time
 import datetime
 from yacastIO import *
+import re
+
 
 class Submission(object):
     """docstring for Submission"""    
@@ -36,6 +38,11 @@ class Submission(object):
         if path2xml == None:
             return self
         
+        idMedia = None
+        m = re.search('\d\d\d\d/\d\d/\d\d/(\d+)/.*\.xml', path2xml)
+        if m:
+            idMedia = m.group(1)
+
         xmlroot = objectify.parse(path2xml).getroot()
         if xmlroot == None:
             return self
@@ -58,7 +65,9 @@ class Submission(object):
                 if eventType not in self.detectionList.keys():
                     self.detectionList[eventType] = []
                 # Add element to the list of elements of this type
-                self.detectionList[eventType].append(YacastEvent(element))
+                event = YacastEvent(element)
+                if not hasattr(event,'idMedia') or idMedia == None or event.idMedia == idMedia:
+                    self.detectionList[eventType].append(event)
             # Sort 
             for eventType in self.detectionList.keys():
                 self.detectionList[eventType].sort(YacastEvent.compareByDate)

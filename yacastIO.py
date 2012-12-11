@@ -24,6 +24,7 @@ import datetime
 
 # List of tags than can be used to indicate the event ID
 idTags = ['id', 'idMusic', 'idAd']
+idMediaTags = ['idMedia', 'idmedia']
 
 # Format used by Yacast to store date/time
 yacastDateTimeFormat = "%Y-%m-%d %H:%M:%S.%f"
@@ -74,8 +75,9 @@ class YacastEvent(object):
         for element in xmlEvent.iterchildren():
             if element.tag in idTags:
                 self.id = str(element)
-        
-                    
+            if element.tag in idMediaTags:
+                self.idMedia = str(element)
+    
     def compareByDate(self, other):
         return cmp(self.dtStart, other.dtStart)
     
