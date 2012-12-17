@@ -203,7 +203,7 @@ if __name__ == '__main__':
         elif opt in ("-S", "--submission-filename"):
             subName = arg
         elif opt in ("-p", "--partial"):
-            partial = True
+            options.partial = True
         elif opt in ("-d", "--skip2days"):
             options.skipTwoDaysEvents = True
         elif opt in ("-f", "--fingerprint"):
