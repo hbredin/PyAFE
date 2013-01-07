@@ -23,8 +23,9 @@ import time
 import datetime
 
 # List of tags than can be used to indicate the event ID
-idTags = ['id', 'idMusic', 'idAd']
+idTags      = ['id', 'idMusic', 'idAd']
 idMediaTags = ['idMedia', 'idmedia']
+skipTags    = ['skip']
 
 # Format used by Yacast to store date/time
 yacastDateTimeFormat = "%Y-%m-%d %H:%M:%S.%f"
@@ -41,26 +42,28 @@ class YacastEvent(object):
         self.dtStart = None
         self.dtEnd = None
         self.id = None
+        self.idMedia = None
         self.XML = xmlEvent
+        self.skip = False
 
         if xmlEvent == None:
             return
         
-        # Get start date/time when available (condidering yacastDateTimeFormat or yacastAltDateTimeFormat)
+        # Get start date/time when available (considering yacastDateTimeFormat or yacastAltDateTimeFormat)
         if hasattr(xmlEvent, 'startDate'):
             try:
                 self.dtStart = datetime.datetime.strptime(str(xmlEvent.startDate), yacastDateTimeFormat)
             except ValueError:
                 self.dtStart = datetime.datetime.strptime(str(xmlEvent.startDate), yacastAltDateTimeFormat)
 
-        # Get end date/time when available (condidering yacastDateTimeFormat or yacastAltDateTimeFormat)
+        # Get end date/time when available (considering yacastDateTimeFormat or yacastAltDateTimeFormat)
         if hasattr(xmlEvent, 'endDate'):
             try:
                 self.dtEnd = datetime.datetime.strptime(str(xmlEvent.endDate), yacastDateTimeFormat)
             except ValueError:
                 self.dtEnd = datetime.datetime.strptime(str(xmlEvent.endDate), yacastAltDateTimeFormat)
 
-        # Get event date/time when one of start/stop date is missing (condidering yacastDateTimeFormat or yacastAltDateTimeFormat)
+        # Get event date/time when one of start/stop date is missing (considering yacastDateTimeFormat or yacastAltDateTimeFormat)
         if self.dtStart == None or self.dtEnd == None:
             if hasattr(xmlEvent, 'eventDate'):
                 try:
@@ -77,6 +80,8 @@ class YacastEvent(object):
                 self.id = str(element)
             if element.tag in idMediaTags:
                 self.idMedia = str(element)
+            if element.tag in skipTags:
+                self.skip = True
     
     def compareByDate(self, other):
         return cmp(self.dtStart, other.dtStart)

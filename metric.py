@@ -98,6 +98,12 @@ def compute_metric(reference_events, submission_events, options):
     
     # for each event in reference
     for cur_event in filled_reference_events:
+        # if event is annotated 'skip'
+        if cur_event.skip:
+            if options.verbosity > 1:
+                print cur_event.description() + " ==> SKIP #" + str(cur_event.id) # LOG
+            continue
+
         # check if reference event is fully included in one calendar day
         # if it is not and user specifically asked not to evaluate this kind of events, skip it
         if cur_event.id != PyAFE_fillerID and cur_event.isFullyIncludedInOneCalendarDay() == False and options.skipTwoDaysEvents:
@@ -112,7 +118,7 @@ def compute_metric(reference_events, submission_events, options):
             if (cur_event.id != PyAFE_fillerID) and ((cur_event.id in options.fingerprints.keys()) == False):
                 e.number = e.number -1 # decrement number of reference events
                 if options.verbosity > 1:
-                    print cur_event.description() + " ==> UNKNOWN FINGERPRINT #%s" % (cur_event.id) # LOG
+                    print cur_event.description() + " ==> UNKNOWN FINGERPRINT #" + str(cur_event.id) # LOG
                 continue
         
         # array 'inter_events' contains events that are detected during 'cur_event'

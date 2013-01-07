@@ -70,13 +70,14 @@ def evaluateFile( groundTruthFile, submissionFile, options):
                 print "%s > ERROR - Start time (or End time) should be formated as HH:MM:SS" % (options.path2xml_ts)
                 return None
         
-        # Write data in options
+            # Write data in options
             options.startH=int(list_start[0])
             options.startM=int(list_start[1])
             options.startS=int(list_start[2])
             options.endH=int(list_end[0])
             options.endM=int(list_end[1])
             options.endS=int(list_end[2])
+
     # Detections (dictionary, one entry per event type)
     submission  = submissionIO.Submission(submissionFile)
     
