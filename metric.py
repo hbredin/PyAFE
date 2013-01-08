@@ -100,6 +100,7 @@ def compute_metric(reference_events, submission_events, options):
     for cur_event in filled_reference_events:
         # if event is annotated 'skip'
         if cur_event.skip:
+            e.number = e.number - 1 # decrement number of reference events
             if options.verbosity > 1:
                 print cur_event.description() + " ==> SKIP #" + str(cur_event.id) # LOG
             continue
@@ -116,7 +117,7 @@ def compute_metric(reference_events, submission_events, options):
         # test if it is available
         if options.fingerprints != {}:
             if (cur_event.id != PyAFE_fillerID) and ((cur_event.id in options.fingerprints.keys()) == False):
-                e.number = e.number -1 # decrement number of reference events
+                e.number = e.number - 1 # decrement number of reference events
                 if options.verbosity > 1:
                     print cur_event.description() + " ==> UNKNOWN FINGERPRINT #" + str(cur_event.id) # LOG
                 continue
